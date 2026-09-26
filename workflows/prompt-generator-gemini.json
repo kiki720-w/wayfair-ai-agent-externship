@@ -1,4 +1,5 @@
 {
+  "id": "75f60d24-8afa-4e53-965b-3616ebf5bea6",
   "name": "Prompt Generator",
   "nodes": [
     {
@@ -82,4 +83,3 @@
   },
   "tags": []
 }
-

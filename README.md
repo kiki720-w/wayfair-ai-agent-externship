@@ -29,6 +29,7 @@ The system message requires the agent to produce:
 ├── evaluation/
 │   └── prompt-evaluation.csv
 ├── .env.example
+├── .gitignore
 └── README.md
 ```
 
@@ -45,6 +46,10 @@ The system message requires the agent to produce:
 6. Save screenshots of the workflow and generated output for the Extern submission.
 
 Never commit an API key. Credentials are stored inside n8n; `.env.example` is documentation only.
+
+### Verified local runtime
+
+The workflow was successfully imported with the n8n `2.40.7` CLI. A local self-hosted instance can be kept isolated from the repository by setting `N8N_USER_FOLDER` to `.n8n-local`; both `.n8n-local/` and `.n8n-runtime/` are ignored by Git.
 
 ## Example inputs
 
@@ -67,6 +72,7 @@ The product framing, metrics, risks, and evaluation plan are documented in [docs
 ## Status
 
 - [x] Prompt Generator workflow scaffold
+- [x] JSON parsed and imported successfully in n8n 2.40.7
 - [x] System prompt and sample inputs
 - [x] Submission-ready document draft
 - [x] Initial evaluation rubric
@@ -74,4 +80,3 @@ The product framing, metrics, risks, and evaluation plan are documented in [docs
 - [ ] Capture real n8n output screenshots
 - [ ] Record actual evaluation results
 - [ ] Build the image-generation stage
-

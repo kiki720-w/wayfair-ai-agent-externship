@@ -1,0 +1,5 @@
+.n8n-local/
+.n8n-runtime/
+node_modules/
+.env
+*.log
