@@ -62,6 +62,8 @@ Ready-to-submit sample outputs and the reflection are in [docs/extern-submission
 
 The Project 2 planning artifact is documented in [docs/project-2-step-1.md](docs/project-2-step-1.md), including a four-block workflow sketch for the Area Rugs market-trend agent.
 
+Stage 1 of the Market Trend Discovery Agent is available as an importable n8n workflow in [workflows/stage-1-input-routing.json](workflows/stage-1-input-routing.json), with implementation and submission notes in [docs/project-2-step-2.md](docs/project-2-step-2.md).
+
 ## Product direction
 
 This first workflow is the input-quality layer of a broader AI market-intelligence product for a rugs category team:

@@ -1,0 +1,9 @@
+test_id,input,expected_route,expected_category,expected_focus
+S1-01,"Area Rug
+focus: washable",true,Area Rug,washable
+S1-02,"Outdoor rugs for a patio",true,Outdoor Rug,
+S1-03,"Please analyze hallway runners",true,Hallway Runner,
+S1-04,"Shaggy rug trends
+focus: neutral colors",true,Shag Rug,neutral colors
+S1-05,"Hello world",false,,
+S1-06,"Carpet trends",false,,
