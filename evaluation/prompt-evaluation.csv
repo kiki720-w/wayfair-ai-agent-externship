@@ -1,0 +1,6 @@
+test_id,input_style,expected_elements,subject_clarity_0_2,style_specificity_0_2,material_color_0_2,scene_coherence_0_2,photography_direction_0_2,negative_constraints_0_2,intent_preservation_0_2,latency_seconds,model,prompt_version,reviewer_notes
+1,"bohemian rugs, neutral tones","rug hero; bohemian; jute or wool; neutral palette; room context",,,,,,,,,"gemini-2.5-flash","v1",
+2,"green botanical rug for a sunlit modern living room","rug hero; botanical pattern; green palette; sunlight; modern room",,,,,,,,,"gemini-2.5-flash","v1",
+3,"black and cream geometric rug in a minimalist loft","rug hero; geometric; black and cream; minimalist loft",,,,,,,,,"gemini-2.5-flash","v1",
+4,"soft blue coastal rug for a family room","rug hero; coastal; blue palette; durable family-room context",,,,,,,,,"gemini-2.5-flash","v1",
+5,"rust vintage-inspired runner for a narrow hallway","runner hero; rust; vintage; narrow hallway",,,,,,,,,"gemini-2.5-flash","v1",

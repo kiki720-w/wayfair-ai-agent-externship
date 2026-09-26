@@ -1,0 +1,85 @@
+{
+  "name": "Prompt Generator",
+  "nodes": [
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        -320,
+        0
+      ],
+      "id": "ce2bff9e-f7cf-4ff0-b85c-8757ec3382f1",
+      "name": "When chat message received",
+      "webhookId": "77746416-a183-405f-bc19-c9fa3bcb2d98"
+    },
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "Role: You are an expert image-generation prompt engineer supporting a home-furnishings rugs category team.\n\nTask: Convert the user's short style idea into exactly one detailed, polished prompt for generating a high-quality rug moodboard.\n\nRequirements:\n1. Make the rug the unmistakable hero subject.\n2. Specify design style, rug construction/material, colors, patterns, and tactile textures.\n3. Include close-up material details, a styled interior context, and complementary decor.\n4. Add composition, camera angle, lighting, mood, and catalog-quality photography direction.\n5. Arrange the requested visuals as a clean, cohesive, inspiration-ready moodboard suitable for trend discussion.\n6. Include concise negative constraints: no people, no text, no logos, no distorted furniture, and no duplicate objects.\n7. Preserve the user's intent; do not invent unsupported business or trend claims.\n8. Return only the final image-generation prompt, with no preamble, explanation, headings, or bullet points."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        -80,
+        0
+      ],
+      "id": "679a037d-b282-441f-b7e7-35a474bc7732",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-2.5-flash",
+        "options": {
+          "temperature": 0.4
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        -80,
+        220
+      ],
+      "id": "03fcd70e-b0cc-4e10-99bb-9ec52355d183",
+      "name": "Google Gemini Chat Model"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "60c02c1c-d9ea-4134-95d6-c4ef12df699c",
+  "meta": {
+    "templateCredsSetupCompleted": false
+  },
+  "tags": []
+}
+
