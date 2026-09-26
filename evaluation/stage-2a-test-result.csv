@@ -1,0 +1,2 @@
+test_id,test_date,input_category,input_focus,http_status,total_products,route,result,latency_ms,scraped_at
+S2A-01,2026-09-27,area_rug,washable,200,10,true,pass,700,2026-05-23T11:35:58.402Z
