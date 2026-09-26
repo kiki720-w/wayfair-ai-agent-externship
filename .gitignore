@@ -1,5 +1,7 @@
 .n8n-local/
 .n8n-runtime/
+.docx-build/
+.docx-render/
 node_modules/
 .env
 *.log
