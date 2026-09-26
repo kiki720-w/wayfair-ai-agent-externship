@@ -60,6 +60,8 @@ On 27 September 2026, the complete workflow was run successfully against Gemini 
 
 Ready-to-submit sample outputs and the reflection are in [docs/extern-submission.md](docs/extern-submission.md).
 
+The Project 2 planning artifact is documented in [docs/project-2-step-1.md](docs/project-2-step-1.md), including a four-block workflow sketch for the Area Rugs market-trend agent.
+
 ## Product direction
 
 This first workflow is the input-quality layer of a broader AI market-intelligence product for a rugs category team:
