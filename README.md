@@ -38,7 +38,7 @@ The system message requires the agent to produce:
 1. Open n8n and choose **Import from File**.
 2. Import `workflows/prompt-generator-gemini.json`.
 3. Open **Google Gemini Chat Model** and create/select a Gemini credential.
-4. Keep the suggested model or select another Gemini chat model available in your n8n version.
+4. Use `models/gemini-3.8-flash`, or select another currently available Gemini chat model in your n8n version.
 5. Open the chat and test a style idea such as:
 
    `bohemian rugs, neutral tones`
@@ -50,6 +50,8 @@ Never commit an API key. Credentials are stored inside n8n; `.env.example` is do
 ### Verified local runtime
 
 The workflow was successfully imported with the n8n `2.40.7` CLI. A local self-hosted instance can be kept isolated from the repository by setting `N8N_USER_FOLDER` to `.n8n-local`; both `.n8n-local/` and `.n8n-runtime/` are ignored by Git.
+
+On 27 September 2026, the complete workflow was run successfully against Gemini 3.8 Flash. The original Gemini 2.5 Flash selection returned a deprecation error for new users, so the archived workflow was migrated to the current model. The verified run completed in 6.443 seconds and produced a 459-token prompt.
 
 ## Example inputs
 
@@ -76,7 +78,8 @@ The product framing, metrics, risks, and evaluation plan are documented in [docs
 - [x] System prompt and sample inputs
 - [x] Submission-ready document draft
 - [x] Initial evaluation rubric
-- [ ] Connect the user's Gemini credential in n8n
+- [x] Connect the user's Gemini credential in local n8n (credential is not stored in Git)
+- [x] Execute the end-to-end workflow successfully with Gemini 3.8 Flash
 - [ ] Capture real n8n output screenshots
-- [ ] Record actual evaluation results
+- [x] Record the first actual evaluation result
 - [ ] Build the image-generation stage

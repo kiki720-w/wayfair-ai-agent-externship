@@ -10,6 +10,26 @@ Add the following before submission:
 - Screenshot 1: full n8n workflow canvas
 - Screenshot 2: n8n chat showing the generated prompt
 
+## Verified live run
+
+- **Date:** 27 September 2026
+- **Model:** Gemini 3.8 Flash
+- **Latency:** 6.443 seconds
+- **Output tokens:** 459
+- **Workflow result:** Success
+
+### Style idea
+
+`Design a cozy Scandinavian living room rug moodboard using warm ivory, oatmeal, and muted sage, with natural wool and subtle geometric texture.`
+
+### Actual Gemini output
+
+A professional interior design moodboard centered on a cozy Scandinavian living room area rug as the hero subject, presented in a clean and cohesive catalog-style layout. The rug features an understated, modern geometric high-low pattern woven from plush natural wool in a soothing palette of warm ivory, heathered oatmeal, and soft muted sage green. The board includes a styled Nordic living room scene showcasing the rug anchored on light white-oak flooring beneath a low minimalist oak coffee table and raw linen sofa corner, illuminated by soft, diffused morning daylight. Flanking panels display tactile macro close-ups highlighting the hand-tufted loop pile texture, yarn twist, and clean serged edge details, alongside complementary decor elements including ribbed matte sage ceramic vessels, an unbleached linen fabric swatch, and light blonde wood samples. Shot with crisp, medium-format editorial photography, balanced lighting, gentle realistic shadows, and an inviting, serene hygge atmosphere, 8k resolution. Negative constraints: no people, no text, no logos, no watermarks, no distorted furniture, no duplicate objects.
+
+### Runtime note
+
+The course template originally referenced Gemini 2.5 Flash. Google returned a 404 stating that model was no longer available to new users, so the workflow was migrated to Gemini 3.8 Flash. The first 3.8 request encountered a temporary high-demand 503; retrying succeeded without changing the prompt or workflow logic.
+
 ## Example 1
 
 ### Style idea
@@ -36,8 +56,6 @@ I wanted to turn short and ambiguous rug-style ideas into prompts detailed enoug
 
 ## Final checks
 
-- Replace the expected outputs with the actual Gemini outputs if they differ.
 - Add real screenshots.
 - Verify the Google Doc contains no API keys.
 - Set the document sharing level required by Extern immediately before submission.
-
