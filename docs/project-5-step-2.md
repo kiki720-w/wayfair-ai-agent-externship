@@ -46,6 +46,11 @@ The complete six-node Dashboard Builder Agent is implemented, imported into loca
 - `scripts/test-project5-dashboard.js` — local integration test
 - `output/html/Area_Rug_Dashboard_2026-09-27.html` — final dashboard
 
+## Submission links
+
+- Workflow JSON (Google Doc, public viewer): https://docs.google.com/document/d/1doSUL0MqXDG2r91wrf-4Kq4zwcr4RMHSY3CTv-EzSTI/edit?usp=sharing
+- Final dashboard HTML (Google Drive, public viewer): https://drive.google.com/file/d/1vvkUGN1uMZ5GTNJcTNkLM7stSxXumawp/view?usp=sharing
+
 ## Product-quality decisions
 
 - The parser is grounded in the controlled report structure rather than relying on an LLM for extraction.
