@@ -66,6 +66,8 @@ Stages 1-7 of the Market Trend Discovery Agent are available as an importable n8
 
 The final Area Rug trend report is in [output/pdf/area-rug-trend-report-2026-09-27.pdf](output/pdf/area-rug-trend-report-2026-09-27.pdf). The verified 53-node run found all 8 required report sections, embedded 3 visual previews and completed with no validation warnings.
 
+Project 3 competitor monitoring Stages 1–4 are available in [workflows/project-3-stage-1-4.json](workflows/project-3-stage-1-4.json), with implementation and test evidence in [docs/project-3-step-2.md](docs/project-3-step-2.md). The verified run collected 10 products each from Wayfair, Amazon and Walmart and merged the three branches into one downstream item.
+
 ## Product direction
 
 This first workflow is the input-quality layer of a broader AI market-intelligence product for a rugs category team:
@@ -91,4 +93,5 @@ The product framing, metrics, risks, and evaluation plan are documented in [docs
 - [x] Build the image-generation stage with a Hugging Face branch and credential-free SVG fallback
 - [x] Complete Stages 5-7 report generation, validation and downloadable packaging
 - [x] Generate and visually verify the final five-page PDF report
+- [x] Build and verify Project 3 competitor-monitoring Stages 1–4
 - [ ] Record the required 1-3 minute Loom walkthrough
