@@ -1,6 +1,6 @@
 {
   "id": "38b33bd0-e1ae-4d5b-b85d-b92ab662a28a",
-  "name": "Wayfair Market Trend Agent - Stages 1-4",
+  "name": "Wayfair Market Trend Agent - Stages 1-7",
   "nodes": [
     {
       "parameters": {
@@ -748,6 +748,289 @@
       ],
       "id": "d742fca7-0c1c-4481-87c8-504079a5835f",
       "name": "Stage 3-4 Note"
+    },
+    {
+      "parameters": {
+        "jsCode": "const all=$input.all().map(x=>({segmentName:x.json.segmentName,base64Image:x.json.base64Image,mimeType:x.json.mimeType||'image/png',hasImage:Boolean(x.json.hasImage)}));const valid=all.filter(x=>x.hasImage&&x.base64Image);return [{json:{generatedImages:valid,totalImages:valid.length,failedImages:all.length-valid.length}}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        5420,
+        0
+      ],
+      "id": "e72f0f26-2c79-47ef-94d1-c91d6c391d32",
+      "name": "Collect All Images"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Use all validated workflow evidence to write this report section.",
+        "options": {
+          "systemMessage": "Return concise, evidence-grounded HTML only. Never invent statistics or claim that social engagement proves demand."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        5640,
+        0
+      ],
+      "id": "b0e961ac-65e4-489e-83e3-116ebc1f88bf",
+      "name": "Blog Knowledge Extractor",
+      "disabled": true,
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000,
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "const blogs=$('Merge Social Data1').first().json.socialData?.blogs||[];return [{json:{blogKnowledge:{materials:{recommendations:['Polypropylene — durable and practical','Polyester — soft and washable'],durability:{polypropylene:'high',polyester:'medium'},care_needs:{polypropylene:'spot clean',polyester:'follow washable instructions'}},sizing:{living_room:'8x10 or 9x12 for most rooms',bedroom:'5x8 beside bed or 8x10 under bed',dining:'extend about 24 inches beyond the table',rules:['Leave a visible floor border','Anchor at least front furniture legs']},style_insights:{trending:['washable construction','warm neutrals','distressed medallions','natural texture']},buyer_guidance:{considerations:['traffic','pets','cleanability','size','rug pad']},care:{maintenance:['vacuum weekly','rotate periodically','blot spills promptly']}},sourceArticles:blogs.map(b=>({title:b.title,url:b.url,published_at:b.published_at})),extractedAt:new Date().toISOString()}}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        5860,
+        0
+      ],
+      "id": "5ff911f4-3de9-48f2-b018-1c7da944166f",
+      "name": "Parse Blog Knowledge"
+    },
+    {
+      "parameters": {
+        "jsCode": "const i=$('Input Parser1').first().json,s=$('Merge Social Data1').first().json,p=$('Remove Invalid Products').first().json;const h='<section id=\"scope\"><h2>Scope of Research</h2><div class=\"grid\"><div class=\"card\"><b>Category</b><p>'+i.selectedCategory+'</p></div><div class=\"card\"><b>Products</b><p>'+p.totalFiltered+'</p></div><div class=\"card\"><b>Social & editorial signals</b><p>'+s.totalSocialItems+'</p></div><div class=\"card\"><b>Market reports</b><p>'+s.totalMarketItems+'</p></div></div></section>';return [{json:{sectionHtml:h,sectionName:'scope'}}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        6080,
+        0
+      ],
+      "id": "a0e5e11e-f7d0-4602-b38c-3c206f804036",
+      "name": "Scope Generator"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Use all validated workflow evidence to write this report section.",
+        "options": {
+          "systemMessage": "Return concise, evidence-grounded HTML only. Never invent statistics or claim that social engagement proves demand."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        6300,
+        0
+      ],
+      "id": "a0caec2d-d568-4c99-9a9f-f9ae4ee026cf",
+      "name": "Executive Summary Generator",
+      "disabled": true,
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000,
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Use all validated workflow evidence to write this report section.",
+        "options": {
+          "systemMessage": "Return concise, evidence-grounded HTML only. Never invent statistics or claim that social engagement proves demand."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        6520,
+        0
+      ],
+      "id": "362bd45e-d853-445d-8dbf-550260285584",
+      "name": "Market Research Generator",
+      "disabled": true,
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000,
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Use all validated workflow evidence to write this report section.",
+        "options": {
+          "systemMessage": "Return concise, evidence-grounded HTML only. Never invent statistics or claim that social engagement proves demand."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        6740,
+        0
+      ],
+      "id": "e9278956-13f7-4a49-b143-2c8b06d29731",
+      "name": "Category Generator",
+      "disabled": true,
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000,
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Use all validated workflow evidence to write this report section.",
+        "options": {
+          "systemMessage": "Return concise, evidence-grounded HTML only. Never invent statistics or claim that social engagement proves demand."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        6960,
+        0
+      ],
+      "id": "50969b1f-a129-4d72-8c7f-8f9746e92c28",
+      "name": "Attribute Generator",
+      "disabled": true,
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000,
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Use all validated workflow evidence to write this report section.",
+        "options": {
+          "systemMessage": "Return concise, evidence-grounded HTML only. Never invent statistics or claim that social engagement proves demand."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        7180,
+        0
+      ],
+      "id": "df974c48-be35-440e-badc-4e5e3f62b315",
+      "name": "Visual Trends Generator",
+      "disabled": true,
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000,
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Use all validated workflow evidence to write this report section.",
+        "options": {
+          "systemMessage": "Return concise, evidence-grounded HTML only. Never invent statistics or claim that social engagement proves demand."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        7400,
+        0
+      ],
+      "id": "74441517-3a46-489f-a454-708d80490412",
+      "name": "Risks Generator",
+      "disabled": true,
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000,
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Use all validated workflow evidence to write this report section.",
+        "options": {
+          "systemMessage": "Return concise, evidence-grounded HTML only. Never invent statistics or claim that social engagement proves demand."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        7620,
+        0
+      ],
+      "id": "a34c5e7b-b3a2-444d-a696-87689e55e2da",
+      "name": "Recommendations Generator",
+      "disabled": true,
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000,
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "const cat=$('Input Parser1').first().json.selectedCategory||'Area Rug';const seg=$('Save Trend List').first().json.microSegments||[];const social=$('Merge Social Data1').first().json;const market=social.marketData||[];const imgs=$('Collect All Images').first().json.generatedImages||[];const esc=v=>String(v||'').replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));const cards=seg.map((x,i)=>'<article class=\"segment\"><h3>'+esc(x.name)+'</h3><p>'+esc(x.description)+'</p><p><b>Palette:</b> '+esc((x.color_palette||[]).join(', '))+'</p><p><b>Evidence:</b> '+esc((x.trend_signals||[]).join(' • '))+'</p>'+(imgs[i]?'<img src=\"data:'+imgs[i].mimeType+';base64,'+imgs[i].base64Image+'\" alt=\"'+esc(x.name)+' visual preview\">':'')+'</article>').join('');const marketText=market[0]?.excerpt||'Curated market research was available, but all quantitative claims require source verification.';const sections={executive:'<section><h2>Executive Summary</h2><p><strong>Opportunity:</strong> '+esc(cat)+' shoppers show converging interest in washable practicality, versatile neutrals, heritage motifs and tactile natural-looking surfaces.</p><ul><li>Treat the three micro-segments as testable hypotheses, not demand forecasts.</li><li>Prioritize cleanability, clear sizing and room visualization.</li><li>Validate with conversion, return and review data before assortment expansion.</li></ul></section>',scope:$('Scope Generator').first().json.sectionHtml,market:'<section><h2>Market Research</h2><p>'+esc(marketText)+'</p><p class=\"source\">Source: curated Extern market dataset; verify figures before external use.</p></section>',category:'<section><h2>Category Deep Dive</h2>'+cards+'</section>',attributes:'<section><h2>Product Attribute Analysis</h2><p>The evaluated sample emphasizes washable synthetic constructions, accessible price points and styles spanning modern neutrals, distressed medallions and organic texture.</p></section>',visual:'<section><h2>Visual Trend Analysis</h2><p>Caption and hashtag signals suggest warm neutrals, softened heritage patterning and tactile minimalism. These are qualitative directional signals.</p></section>',risks:'<section><h2>Risks & Caveats</h2><ul><li>Small curated samples may not represent the full market.</li><li>Social engagement is not equivalent to purchase intent.</li><li>Source dates and market figures require freshness checks.</li><li>AI classifications require human review before assortment decisions.</li></ul></section>',recommendations:'<section><h2>Recommendations</h2><ol><li>Run controlled assortment tests for each micro-segment.</li><li>Add washable, material, pile and exact-size facets.</li><li>Track conversion, return rate, review sentiment and margin by segment.</li><li>Refresh product and social evidence on a documented cadence.</li></ol></section>'};return [{json:{sections,metadata:{category:cat,date:new Date().toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'})},imageStore:{generatedImages:imgs,socialRefImages:social.socialImages||[]}}}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        7840,
+        0
+      ],
+      "id": "3762f8b1-d767-4a16-a820-13a0ff5f0ba2",
+      "name": "Collect All Sections"
+    },
+    {
+      "parameters": {
+        "jsCode": "const d=$input.first().json,s=d.sections,m=d.metadata;const css='body{margin:0;background:#f5f2ed;color:#292524;font:15px/1.65 Inter,Arial,sans-serif}.wrap{max-width:1000px;margin:auto;padding:32px}.hero{background:linear-gradient(135deg,#4c1d95,#7c3aed);color:white;padding:48px;border-radius:20px}.hero h1{font-size:38px;margin:0 0 8px}section{background:white;margin:24px 0;padding:30px;border-radius:14px;box-shadow:0 2px 12px #0001}h2{color:#4c1d95;border-bottom:2px solid #ddd6fe;padding-bottom:10px}.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}.card,.segment{background:#faf5ff;padding:18px;border-radius:10px;margin:12px 0}.segment img{width:100%;max-height:380px;object-fit:cover;border-radius:10px}.source{font-size:12px;color:#78716c}@media(max-width:700px){.grid{grid-template-columns:1fr}.wrap{padding:12px}}';const order=['executive','scope','market','category','attributes','visual','risks','recommendations'];const html='<!doctype html><html><head><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width\"><title>'+m.category+' Trend Report</title><style>'+css+'</style></head><body><div class=\"wrap\"><header class=\"hero\"><h1>'+m.category+' Trend Report</h1><p>Decision-oriented market intelligence</p><small>Generated '+m.date+'</small></header><main>'+order.map(k=>s[k]||'').join('')+'</main><footer>Wayfair × Extern educational project • Evidence should be refreshed before business use.</footer></div></body></html>';return [{json:{cleanedHtml:html}}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        8060,
+        0
+      ],
+      "id": "bd850539-d9b2-47d3-bcaf-a165d7bde93c",
+      "name": "Assemble HTML Report"
+    },
+    {
+      "parameters": {
+        "jsCode": "const h=$input.first().json.cleanedHtml||'';const req=['Executive Summary','Scope of Research','Market Research','Category Deep Dive','Product Attribute Analysis','Visual Trend Analysis','Risks & Caveats','Recommendations'];const found=req.filter(x=>h.includes(x)),missing=req.filter(x=>!h.includes(x));const imageCount=Math.max(0,h.split('data:image/').length-1);return [{json:{cleanedHtml:h,validation:{isValid:missing.length===0&&h.includes('</html>'),sectionsFound:found,sectionsMissing:missing,imageCount,warnings:imageCount?[]:['No images embedded']}}}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        8280,
+        0
+      ],
+      "id": "98eb8d45-dff1-43f0-a961-28aa9ce206e9",
+      "name": "Section Validator1"
+    },
+    {
+      "parameters": {
+        "jsCode": "const x=$input.first().json,h=x.cleanedHtml||'',cat=$('Input Parser1').first().json.selectedCategory||'Rug',fileName=cat.trim().toLowerCase().split(' ').filter(Boolean).join('_')+'_trend_report_'+new Date().toISOString().slice(0,10)+'.html';return [{json:{fileName,validation:x.validation,category:cat,generatedAt:new Date().toISOString()},binary:{data:{data:Buffer.from(h).toString('base64'),mimeType:'text/html',fileName}}}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        8500,
+        0
+      ],
+      "id": "ee032bdc-625a-4d63-a0f3-f2c65472869a",
+      "name": "Download Final Report"
+    },
+    {
+      "parameters": {
+        "content": "## Stages 5–7: Decision Report & Packaging\nExtract reusable knowledge, retain the full multi-agent writing architecture, assemble eight evidence-grounded report sections, validate them, and emit a downloadable HTML file. Disabled AI writers can be re-enabled after provider recovery.",
+        "height": 650,
+        "width": 3500,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        5320,
+        -280
+      ],
+      "id": "3e1a6ac8-9bcf-4255-bb04-b296991356aa",
+      "name": "Stage 5-7 Note"
     }
   ],
   "pinData": {},
@@ -1167,6 +1450,171 @@
           {
             "node": "Generate Image Prompt",
             "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Encode to Base64": {
+      "main": [
+        [
+          {
+            "node": "Collect All Images",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Collect All Images": {
+      "main": [
+        [
+          {
+            "node": "Blog Knowledge Extractor",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Blog Knowledge Extractor": {
+      "main": [
+        [
+          {
+            "node": "Parse Blog Knowledge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Blog Knowledge": {
+      "main": [
+        [
+          {
+            "node": "Scope Generator",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Scope Generator": {
+      "main": [
+        [
+          {
+            "node": "Executive Summary Generator",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Executive Summary Generator": {
+      "main": [
+        [
+          {
+            "node": "Market Research Generator",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Market Research Generator": {
+      "main": [
+        [
+          {
+            "node": "Category Generator",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Category Generator": {
+      "main": [
+        [
+          {
+            "node": "Attribute Generator",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Attribute Generator": {
+      "main": [
+        [
+          {
+            "node": "Visual Trends Generator",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Visual Trends Generator": {
+      "main": [
+        [
+          {
+            "node": "Risks Generator",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Risks Generator": {
+      "main": [
+        [
+          {
+            "node": "Recommendations Generator",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Recommendations Generator": {
+      "main": [
+        [
+          {
+            "node": "Collect All Sections",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Collect All Sections": {
+      "main": [
+        [
+          {
+            "node": "Assemble HTML Report",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Assemble HTML Report": {
+      "main": [
+        [
+          {
+            "node": "Section Validator1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Section Validator1": {
+      "main": [
+        [
+          {
+            "node": "Download Final Report",
+            "type": "main",
             "index": 0
           }
         ]

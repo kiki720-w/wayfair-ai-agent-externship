@@ -62,7 +62,9 @@ Ready-to-submit sample outputs and the reflection are in [docs/extern-submission
 
 The Project 2 planning artifact is documented in [docs/project-2-step-1.md](docs/project-2-step-1.md), including a four-block workflow sketch for the Area Rugs market-trend agent.
 
-Stages 1–4 of the Market Trend Discovery Agent are available as an importable n8n workflow in [workflows/stage-1-input-routing.json](workflows/stage-1-input-routing.json). Stage 1 implementation notes are in [docs/project-2-step-2.md](docs/project-2-step-2.md), the Amazon product-data stage is documented in [docs/project-2-step-3.md](docs/project-2-step-3.md), the social/industry signal pipeline in [docs/project-2-step-4.md](docs/project-2-step-4.md), and the AI processing plus visual-generation stages in [docs/project-2-step-5.md](docs/project-2-step-5.md).
+Stages 1-7 of the Market Trend Discovery Agent are available as an importable n8n workflow in [workflows/stage-1-input-routing.json](workflows/stage-1-input-routing.json). Stage 1 implementation notes are in [docs/project-2-step-2.md](docs/project-2-step-2.md), the Amazon product-data stage is documented in [docs/project-2-step-3.md](docs/project-2-step-3.md), the social/industry signal pipeline in [docs/project-2-step-4.md](docs/project-2-step-4.md), the AI processing plus visual-generation stages in [docs/project-2-step-5.md](docs/project-2-step-5.md), and final report generation in [docs/project-2-step-6.md](docs/project-2-step-6.md).
+
+The final Area Rug trend report is in [output/pdf/area-rug-trend-report-2026-09-27.pdf](output/pdf/area-rug-trend-report-2026-09-27.pdf). The verified 53-node run found all 8 required report sections, embedded 3 visual previews and completed with no validation warnings.
 
 ## Product direction
 
@@ -84,6 +86,9 @@ The product framing, metrics, risks, and evaluation plan are documented in [docs
 - [x] Initial evaluation rubric
 - [x] Connect the user's Gemini credential in local n8n (credential is not stored in Git)
 - [x] Execute the end-to-end workflow successfully with Gemini 3.8 Flash
-- [ ] Capture real n8n output screenshots
+- [x] Capture real n8n output screenshots
 - [x] Record the first actual evaluation result
-- [ ] Build the image-generation stage
+- [x] Build the image-generation stage with a Hugging Face branch and credential-free SVG fallback
+- [x] Complete Stages 5-7 report generation, validation and downloadable packaging
+- [x] Generate and visually verify the final five-page PDF report
+- [ ] Record the required 1-3 minute Loom walkthrough
