@@ -1,0 +1,259 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="AI product portfolio and learning progress dashboard">
+  <title>AI Product Portfolio Dashboard</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23090f1f'/%3E%3Cpath d='M15 44 27 18l7 15 6-10 9 21' fill='none' stroke='%2376f7c6' stroke-width='6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+  <style>
+    :root {
+      color-scheme: dark;
+      --ink: #eef5ff;
+      --muted: #93a4bd;
+      --bg: #07101f;
+      --panel: #0c1729;
+      --panel-2: #101d31;
+      --line: #22314a;
+      --mint: #76f7c6;
+      --cyan: #49c6f1;
+      --violet: #a68cff;
+      --amber: #ffcb6b;
+      --danger: #ff7e8b;
+      --radius: 20px;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-width: 320px;
+      min-height: 100vh;
+      background:
+        radial-gradient(circle at 78% -20%, rgba(73, 198, 241, .16), transparent 36rem),
+        radial-gradient(circle at -10% 70%, rgba(166, 140, 255, .12), transparent 34rem),
+        var(--bg);
+      color: var(--ink);
+      font: 16px/1.5 Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    .shell { max-width: 1480px; margin: 0 auto; padding: 28px; }
+
+    header {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 24px;
+      margin-bottom: 24px;
+    }
+
+    .eyebrow {
+      margin: 0 0 8px;
+      color: var(--mint);
+      font-size: .78rem;
+      font-weight: 800;
+      letter-spacing: .15em;
+      text-transform: uppercase;
+    }
+
+    h1 { margin: 0; font-size: clamp(2rem, 4vw, 3.7rem); line-height: .98; letter-spacing: -.055em; }
+    .subhead { margin: 12px 0 0; color: var(--muted); max-width: 720px; }
+
+    .date {
+      flex: 0 0 auto;
+      padding: 12px 15px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: rgba(12, 23, 41, .74);
+      color: var(--muted);
+      font-size: .88rem;
+    }
+
+    .status-dot { display: inline-block; width: 9px; height: 9px; margin-right: 8px; border-radius: 50%; background: var(--mint); box-shadow: 0 0 18px var(--mint); }
+
+    .metrics {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 14px;
+      margin-bottom: 18px;
+    }
+
+    .card {
+      position: relative;
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: linear-gradient(145deg, rgba(16, 29, 49, .96), rgba(9, 19, 35, .96));
+      box-shadow: 0 18px 44px rgba(0, 0, 0, .22);
+    }
+
+    .metric { min-height: 150px; padding: 20px; }
+    .metric::after { content: ""; position: absolute; inset: auto -20px -45px auto; width: 100px; height: 100px; border-radius: 50%; background: var(--accent); opacity: .09; filter: blur(2px); }
+    .metric-label { color: var(--muted); font-size: .82rem; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; }
+    .metric-value { display: block; margin: 17px 0 6px; font-size: 2.35rem; font-weight: 850; line-height: 1; letter-spacing: -.055em; }
+    .metric-note { color: var(--muted); font-size: .83rem; }
+    .metric:nth-child(1) { --accent: var(--mint); }
+    .metric:nth-child(2) { --accent: var(--cyan); }
+    .metric:nth-child(3) { --accent: var(--violet); }
+    .metric:nth-child(4) { --accent: var(--amber); }
+    .metric:nth-child(5) { --accent: var(--danger); }
+
+    .grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.45fr) minmax(330px, .75fr);
+      gap: 18px;
+    }
+
+    .stack { display: grid; gap: 18px; }
+    .section { padding: 24px; }
+    .section-head { display: flex; justify-content: space-between; align-items: center; gap: 18px; margin-bottom: 20px; }
+    h2 { margin: 0; font-size: 1.08rem; letter-spacing: -.015em; }
+    .section-kicker { color: var(--muted); font-size: .8rem; }
+
+    .project-list { display: grid; gap: 12px; }
+    .project {
+      display: grid;
+      grid-template-columns: 44px minmax(0, 1fr) auto;
+      align-items: center;
+      gap: 14px;
+      padding: 15px;
+      border: 1px solid rgba(255,255,255,.07);
+      border-radius: 16px;
+      background: rgba(255,255,255,.025);
+      transition: transform .2s ease, border-color .2s ease;
+    }
+    .project:hover { transform: translateY(-2px); border-color: rgba(118,247,198,.35); }
+    .project-icon { display: grid; place-items: center; width: 44px; height: 44px; border-radius: 13px; background: rgba(118,247,198,.09); font-size: 1.25rem; }
+    .project strong { display: block; margin-bottom: 3px; }
+    .project small { color: var(--muted); }
+    .chip { padding: 6px 10px; border-radius: 999px; background: rgba(118,247,198,.11); color: var(--mint); font-size: .74rem; font-weight: 800; white-space: nowrap; }
+
+    .bars { display: grid; gap: 18px; }
+    .bar-row { display: grid; grid-template-columns: 150px 1fr 42px; align-items: center; gap: 12px; }
+    .bar-label { color: #c8d4e5; font-size: .88rem; }
+    .track { height: 10px; overflow: hidden; border-radius: 99px; background: #17243a; }
+    .fill { height: 100%; width: var(--value); border-radius: inherit; background: linear-gradient(90deg, var(--cyan), var(--mint)); box-shadow: 0 0 22px rgba(118,247,198,.28); }
+    .bar-value { text-align: right; color: var(--muted); font-size: .82rem; }
+
+    .signal {
+      padding: 20px;
+      border-radius: 16px;
+      background: linear-gradient(135deg, rgba(73,198,241,.13), rgba(166,140,255,.08));
+      border: 1px solid rgba(73,198,241,.18);
+    }
+    .signal p { margin: 7px 0 0; color: #c9d7e9; }
+    .signal strong { color: var(--cyan); }
+
+    .timeline { position: relative; display: grid; gap: 18px; padding-left: 20px; }
+    .timeline::before { content: ""; position: absolute; left: 5px; top: 8px; bottom: 8px; width: 2px; background: linear-gradient(var(--mint), var(--violet)); }
+    .event { position: relative; }
+    .event::before { content: ""; position: absolute; left: -19px; top: 8px; width: 10px; height: 10px; border-radius: 50%; background: var(--mint); box-shadow: 0 0 0 5px rgba(118,247,198,.1); }
+    .event time { color: var(--muted); font-size: .75rem; }
+    .event strong { display: block; margin-top: 2px; }
+    .event p { margin: 4px 0 0; color: var(--muted); font-size: .84rem; }
+
+    .insights { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+    .insight { padding: 17px; border: 1px solid rgba(255,255,255,.07); border-radius: 16px; background: rgba(255,255,255,.025); }
+    .insight span { color: var(--amber); font-weight: 850; font-size: .78rem; }
+    .insight p { margin: 8px 0 0; color: #c9d6e6; font-size: .88rem; }
+
+    footer { display: flex; justify-content: space-between; gap: 16px; margin-top: 18px; padding: 14px 4px; color: var(--muted); font-size: .78rem; }
+
+    @media (max-width: 1100px) {
+      .metrics { grid-template-columns: repeat(3, 1fr); }
+      .grid { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 720px) {
+      .shell { padding: 18px; }
+      header { align-items: flex-start; flex-direction: column; }
+      .metrics { grid-template-columns: 1fr 1fr; }
+      .metric { min-height: 132px; }
+      .insights { grid-template-columns: 1fr; }
+      .bar-row { grid-template-columns: 112px 1fr 36px; }
+      .project { grid-template-columns: 40px minmax(0, 1fr); }
+      .project .chip { grid-column: 2; justify-self: start; }
+      footer { flex-direction: column; }
+    }
+
+    @media (max-width: 460px) {
+      .metrics { grid-template-columns: 1fr; }
+      .section { padding: 19px; }
+    }
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <header>
+      <div>
+        <p class="eyebrow">Portfolio Intelligence / 2026</p>
+        <h1>AI Product<br>Progress Dashboard</h1>
+        <p class="subhead">A decision view of agent-building experience, validated deliverables, and the capabilities developed across the Wayfair × Extern program.</p>
+      </div>
+      <div class="date"><span class="status-dot"></span>Updated 27 September 2026</div>
+    </header>
+
+    <section class="metrics" aria-label="Key progress metrics">
+      <article class="card metric"><span class="metric-label">Program complete</span><strong class="metric-value">83%</strong><span class="metric-note">Four major projects delivered</span></article>
+      <article class="card metric"><span class="metric-label">AI agents built</span><strong class="metric-value">4</strong><span class="metric-note">Prompt, trends, competitors, content</span></article>
+      <article class="card metric"><span class="metric-label">Workflow nodes</span><strong class="metric-value">89+</strong><span class="metric-note">Across production-style pipelines</span></article>
+      <article class="card metric"><span class="metric-label">Validated runs</span><strong class="metric-value">100%</strong><span class="metric-note">Required sections present</span></article>
+      <article class="card metric"><span class="metric-label">Portfolio assets</span><strong class="metric-value">12</strong><span class="metric-note">Reports, workflows, demos, plans</span></article>
+    </section>
+
+    <div class="grid">
+      <div class="stack">
+        <section class="card section">
+          <div class="section-head"><h2>Agent portfolio</h2><span class="section-kicker">Evidence of execution</span></div>
+          <div class="project-list">
+            <article class="project"><div class="project-icon">✦</div><div><strong>Moodboard Prompt Generator</strong><small>Structured creative prompts from short design inputs</small></div><span class="chip">LIVE</span></article>
+            <article class="project"><div class="project-icon">↗</div><div><strong>Consumer Trend Discovery Agent</strong><small>53-node pipeline · eight-section market report</small></div><span class="chip">VERIFIED</span></article>
+            <article class="project"><div class="project-icon">◎</div><div><strong>Competitor Monitoring Agent</strong><small>Wayfair vs Amazon vs Walmart · 30-product sample</small></div><span class="chip">VERIFIED</span></article>
+            <article class="project"><div class="project-icon">◇</div><div><strong>AI Content Strategy Copilot</strong><small>Grounded campaigns, email, video, ads and SEO</small></div><span class="chip">ENHANCED</span></article>
+          </div>
+        </section>
+
+        <section class="card section">
+          <div class="section-head"><h2>Capability growth</h2><span class="section-kicker">Self-assessment</span></div>
+          <div class="bars">
+            <div class="bar-row"><span class="bar-label">AI product thinking</span><div class="track"><div class="fill" style="--value:94%"></div></div><span class="bar-value">94</span></div>
+            <div class="bar-row"><span class="bar-label">Workflow design</span><div class="track"><div class="fill" style="--value:91%"></div></div><span class="bar-value">91</span></div>
+            <div class="bar-row"><span class="bar-label">Prompt engineering</span><div class="track"><div class="fill" style="--value:88%"></div></div><span class="bar-value">88</span></div>
+            <div class="bar-row"><span class="bar-label">Evaluation</span><div class="track"><div class="fill" style="--value:86%"></div></div><span class="bar-value">86</span></div>
+            <div class="bar-row"><span class="bar-label">Data storytelling</span><div class="track"><div class="fill" style="--value:84%"></div></div><span class="bar-value">84</span></div>
+          </div>
+        </section>
+
+        <section class="card section">
+          <div class="section-head"><h2>What the data says</h2><span class="section-kicker">Portfolio insights</span></div>
+          <div class="insights">
+            <article class="insight"><span>01 / RELIABILITY</span><p>Structured output needs both schema validation and semantic grounding; valid JSON can still be wrong.</p></article>
+            <article class="insight"><span>02 / PRODUCT VALUE</span><p>The strongest agents reduce decision friction, not merely generate more content.</p></article>
+            <article class="insight"><span>03 / NEXT MOVE</span><p>Unify trend, competitor and content outputs into one decision-oriented market dashboard.</p></article>
+          </div>
+        </section>
+      </div>
+
+      <aside class="stack">
+        <section class="card section">
+          <div class="section-head"><h2>Current signal</h2><span class="section-kicker">Readiness</span></div>
+          <div class="signal"><strong>Portfolio-ready foundation</strong><p>Four connected AI workflows demonstrate research, orchestration, evaluation and business communication.</p></div>
+        </section>
+
+        <section class="card section">
+          <div class="section-head"><h2>Delivery timeline</h2><span class="section-kicker">Latest milestones</span></div>
+          <div class="timeline">
+            <article class="event"><time>PROJECT 1</time><strong>Prompt system shipped</strong><p>Gemini-backed moodboard prompt generator.</p></article>
+            <article class="event"><time>PROJECT 2</time><strong>Trend agent validated</strong><p>Eight required report sections, three visual previews.</p></article>
+            <article class="event"><time>PROJECT 3</time><strong>Competitive view delivered</strong><p>Pricing, whitespace and supplier research.</p></article>
+            <article class="event"><time>PROJECT 4</time><strong>Content copilot enhanced</strong><p>Semantic checks, fallback logic and 14-page output.</p></article>
+            <article class="event"><time>NEXT</time><strong>Market Intelligence Dashboard</strong><p>One executive view for category decisions.</p></article>
+          </div>
+        </section>
+      </aside>
+    </div>
+
+    <footer><span>Wang Luofei · AI Product Portfolio</span><span>Sample dashboard created for Project 5 learning exercise</span></footer>
+  </main>
+</body>
+</html>

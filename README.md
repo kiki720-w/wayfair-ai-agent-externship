@@ -74,6 +74,8 @@ Project 4 begins with the importable [Content Strategy Agent](workflows/project-
 
 Project 4 Step 3 is complete. The enhanced nine-node workflow is in [workflows/project-4-enhanced-content-strategy-agent.json](workflows/project-4-enhanced-content-strategy-agent.json), with test evidence, Extern answers, and a five-minute recording script in [docs/project-4-step-3.md](docs/project-4-step-3.md). Verified execution 32 produced the visually checked 14-page [Wayfair Enhanced Content Strategy Report](output/pdf/wayfair-enhanced-content-strategy-report.pdf), including schema and semantic category-grounding safeguards.
 
+Project 5 Step 1 is documented in [docs/project-5-step-1.md](docs/project-5-step-1.md). The exercise produced a responsive single-file [AI Product Progress Dashboard](sites/ai-product-portfolio-dashboard/dist/index.html), plus the two standalone inputs required by the Dashboard Builder Agent: the [Project 2 market-trend HTML](output/html/area-rug-market-trend-report.html) and [Project 3 competitor-analysis HTML](output/html/wayfair-competitor-analysis-report.html). Project 5 requires no OAuth login, API key, or external credential.
+
 ## Product direction
 
 This first workflow is the input-quality layer of a broader AI market-intelligence product for a rugs category team:
@@ -106,6 +108,8 @@ The product framing, metrics, risks, and evaluation plan are documented in [docs
 - [x] Build and test the Project 4 enhancement
 - [x] Export and visually verify the final 14-page PDF report
 - [x] Create the workflow JSON Google Doc
+- [x] Complete Project 5 Step 1 dashboard exercise and prerequisite check
+- [x] Preserve Project 2 and Project 3 reports as standalone HTML inputs
 - [ ] Record the required approximately five-minute walkthrough
 - [ ] Set the video and workflow JSON links to anyone-with-link view access
 - [ ] Submit the Project 4 Step 3 form
