@@ -68,6 +68,8 @@ The final Area Rug trend report is in [output/pdf/area-rug-trend-report-2026-09-
 
 Project 3 competitor monitoring Stages 1–4 are available in [workflows/project-3-stage-1-4.json](workflows/project-3-stage-1-4.json), with implementation and test evidence in [docs/project-3-step-2.md](docs/project-3-step-2.md). The verified run collected 10 products each from Wayfair, Amazon and Walmart and merged the three branches into one downstream item.
 
+The complete Project 3 Stages 1–6 agent is available in [workflows/project-3-competitor-monitoring-agent.json](workflows/project-3-competitor-monitoring-agent.json), with implementation decisions and submission answers in [docs/project-3-step-3.md](docs/project-3-step-3.md). Its verified 27-node run produced all 7 required sections, passed validation with no missing content or warnings, and supports deterministic evidence-based fallbacks during transient model rate limits. The final five-page report is [output/pdf/wayfair-competitor-monitoring-report.pdf](output/pdf/wayfair-competitor-monitoring-report.pdf).
+
 ## Product direction
 
 This first workflow is the input-quality layer of a broader AI market-intelligence product for a rugs category team:
@@ -94,4 +96,5 @@ The product framing, metrics, risks, and evaluation plan are documented in [docs
 - [x] Complete Stages 5-7 report generation, validation and downloadable packaging
 - [x] Generate and visually verify the final five-page PDF report
 - [x] Build and verify Project 3 competitor-monitoring Stages 1–4
+- [x] Complete Project 3 Stages 5–6 analysis, validation and final report delivery
 - [ ] Record the required 1-3 minute Loom walkthrough

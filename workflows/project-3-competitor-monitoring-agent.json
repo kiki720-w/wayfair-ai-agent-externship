@@ -1,0 +1,809 @@
+{
+  "id": "bc182412-8147-4a9d-aa54-5d6a655b9b91",
+  "name": "Wayfair Competitor Monitoring Agent - Stages 1-6",
+  "nodes": [
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        -900,
+        0
+      ],
+      "id": "0d6d63d1-2220-4a42-a4be-4a501b7b0101",
+      "name": "When chat message received",
+      "webhookId": "9b3e8c28-6b5f-4c79-999f-e4ac4c412001"
+    },
+    {
+      "parameters": {
+        "jsCode": "// INPUT PARSER - Project 3 Competitor Monitoring\n// Extracts category + optional focus keyword from chat input.\n// Products for each retailer are pulled by category from the program's data server.\nconst input = $input.first().json.chatInput || '';\n\nconst categories = [\n  { key: 'area_rug', displayName: 'Area Rug', patterns: ['area rug', 'area rugs'] },\n  { key: 'outdoor_rug', displayName: 'Outdoor Rug', patterns: ['outdoor rug', 'outdoor rugs', 'patio rug', 'patio rugs'] },\n  { key: 'hallway_runner', displayName: 'Hallway Runner', patterns: ['hallway runner', 'runner rug', 'hall runner', 'runners', 'hallway runners'] },\n  { key: 'shag_rug', displayName: 'Shag Rug', patterns: ['shag rug', 'shag rugs', 'shaggy rug', 'shaggy rugs'] },\n];\n\nconst lowerInput = input.toLowerCase();\nlet detectedCategory = null;\nfor (const cat of categories) {\n  for (const pattern of cat.patterns) {\n    if (lowerInput.includes(pattern)) {\n      detectedCategory = cat;\n      break;\n    }\n  }\n  if (detectedCategory) break;\n}\n\nconst focusMatch = input.match(/focus\\s*:\\s*([^\\n]+)/i);\nconst focus = focusMatch ? focusMatch[1].trim() : '';\nconst hasCategory = !!detectedCategory;\nconst categoryKey = detectedCategory ? detectedCategory.key : null;\nconst categoryDisplayName = detectedCategory ? detectedCategory.displayName : null;\n\nreturn [{\n  json: {\n    category: categoryKey,\n    categoryKey,\n    categoryDisplayName,\n    focus,\n    hasValidInput: hasCategory,\n    errorReason: hasCategory ? null : 'no_category',\n    originalInput: input,\n    parsedAt: new Date().toISOString(),\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -660,
+        0
+      ],
+      "id": "0d6d63d1-2220-4a42-a4be-4a501b7b0102",
+      "name": "Input Parser"
+    },
+    {
+      "parameters": {
+        "url": "http://34.196.186.128:8000/api/products/wayfair",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "category",
+              "value": "={{ $('Input Parser').item.json.categoryKey }}"
+            },
+            {
+              "name": "limit",
+              "value": "10"
+            }
+          ]
+        },
+        "options": {
+          "timeout": 30000
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -390,
+        -260
+      ],
+      "id": "0d6d63d1-2220-4a42-a4be-4a501b7b0103",
+      "name": "Fetch Wayfair Products",
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000,
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Reshape FastAPI response to the legacy shape that downstream consumers expect.\nconst r = $input.first().json;\nconst products = r.products || [];\nreturn [{\n  json: {\n    wayfair_products: products.map(p => ({\n      url: p.url,\n      name: p.name,\n      price: p.price,\n      details: p.details || [],\n      pattern: p.pattern || '',\n      image_url: p.image_url || '',\n      rating: p.rating || '',\n      review_count: p.review_count || '',\n      scraped_at: r.scraped_at || new Date().toISOString(),\n    })),\n    totalWayfair: products.length,\n    totalProducts: products.length,\n    scrapedAt: r.scraped_at || new Date().toISOString(),\n  },\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -100,
+        -260
+      ],
+      "id": "0d6d63d1-2220-4a42-a4be-4a501b7b0104",
+      "name": "Reshape Wayfair Response"
+    },
+    {
+      "parameters": {
+        "url": "http://34.196.186.128:8000/api/products/amazon",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "category",
+              "value": "={{ $('Input Parser').item.json.categoryKey }}"
+            },
+            {
+              "name": "limit",
+              "value": "10"
+            }
+          ]
+        },
+        "options": {
+          "timeout": 30000
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -390,
+        0
+      ],
+      "id": "0d6d63d1-2220-4a42-a4be-4a501b7b0105",
+      "name": "Fetch Amazon Products",
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000,
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "const r = $input.first().json;\nconst products = r.products || [];\nreturn [{\n  json: {\n    amazonProducts: products.map(p => ({\n      url: p.url,\n      name: p.name,\n      price: p.price,\n      details: p.details || [],\n      pattern: p.pattern || '',\n      image_url: p.image_url || '',\n      rating: p.rating || '',\n      review_count: p.review_count || '',\n      scraped_at: r.scraped_at || new Date().toISOString(),\n    })),\n    totalAmazonProducts: products.length,\n    totalProducts: products.length,\n    scrapedAt: r.scraped_at || new Date().toISOString(),\n  },\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -100,
+        0
+      ],
+      "id": "0d6d63d1-2220-4a42-a4be-4a501b7b0106",
+      "name": "Reshape Amazon Response"
+    },
+    {
+      "parameters": {
+        "url": "http://34.196.186.128:8000/api/products/walmart",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "category",
+              "value": "={{ $('Input Parser').item.json.categoryKey }}"
+            },
+            {
+              "name": "limit",
+              "value": "10"
+            }
+          ]
+        },
+        "options": {
+          "timeout": 30000
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -390,
+        260
+      ],
+      "id": "0d6d63d1-2220-4a42-a4be-4a501b7b0107",
+      "name": "Fetch Walmart Products",
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000,
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "const r = $input.first().json;\nconst products = r.products || [];\nreturn [{\n  json: {\n    walmartProducts: products.map(p => ({\n      url: p.url,\n      name: p.name,\n      price: p.price,\n      details: p.details || [],\n      pattern: p.pattern || '',\n      image_url: p.image_url || '',\n      rating: p.rating || '',\n      review_count: p.review_count || '',\n      scraped_at: r.scraped_at || new Date().toISOString(),\n    })),\n    totalWalmartProducts: products.length,\n    totalProducts: products.length,\n    scrapedAt: r.scraped_at || new Date().toISOString(),\n  },\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -100,
+        260
+      ],
+      "id": "0d6d63d1-2220-4a42-a4be-4a501b7b0108",
+      "name": "Reshape Walmart Response"
+    },
+    {
+      "parameters": {
+        "numberInputs": 3,
+        "mode": "combine",
+        "combineBy": "combineByPosition",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        220,
+        0
+      ],
+      "id": "0d6d63d1-2220-4a42-a4be-4a501b7b0109",
+      "name": "Merge Retailer Data"
+    },
+    {
+      "parameters": {
+        "jsCode": "const input=$('Input Parser').first().json;\nconst wf=$('Reshape Wayfair Response').first().json;\nconst am=$('Reshape Amazon Response').first().json;\nconst wm=$('Reshape Walmart Response').first().json;\nconst category=input.categoryDisplayName||'Rugs';\nconst html='<section class=\"scope\"><h2>Scope of Research</h2><div class=\"stats\"><div><b>Category</b><span>'+category+'</span></div><div><b>Wayfair</b><span>'+(wf.wayfair_products?.length||0)+' products</span></div><div><b>Amazon</b><span>'+(am.amazonProducts?.length||0)+' products</span></div><div><b>Walmart</b><span>'+(wm.walmartProducts?.length||0)+' products</span></div></div><p>Evidence includes product names, listed prices, ratings, review counts and public product URLs. Findings reflect the supplied sample and require human review before commercial use.</p></section>';\nreturn [{json:{section:'scope',html,category,focus:input.focus||'',generatedAt:new Date().toISOString()}}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        500,
+        -420
+      ],
+      "id": "47bd38e5-acd1-4d38-a5b0-e85b9609af76",
+      "name": "Scope Generator"
+    },
+    {
+      "parameters": {
+        "amount": 1
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        740,
+        -420
+      ],
+      "id": "de0c6818-5859-44d8-8232-73260a95f70d",
+      "name": "Wait After Scope",
+      "webhookId": "ae2c4a6c-5f03-4c46-b963-b07da1f27b79"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=CATEGORY: {{ $('Input Parser').first().json.categoryDisplayName }}\nFOCUS: {{ $('Input Parser').first().json.focus || 'general competitive monitoring' }}\nWAYFAIR: {{ JSON.stringify($('Reshape Wayfair Response').first().json.wayfair_products, null, 2) }}\nAMAZON: {{ JSON.stringify($('Reshape Amazon Response').first().json.amazonProducts, null, 2) }}\nWALMART: {{ JSON.stringify($('Reshape Walmart Response').first().json.walmartProducts, null, 2) }}",
+        "options": {
+          "systemMessage": "You are a senior competitive analyst for Wayfair. Produce <section class=\"executive-summary\"><h2>Executive Summary</h2> with one key insight, 5 concise evidence-backed findings covering price, assortment, ratings/reviews and strategic implications, plus a short implications paragraph. Return one complete semantic HTML <section> only. No markdown fences. Use only supplied evidence; calculate carefully, label missing data, preserve actual product URLs, and do not invent shipping, supplier, material, or brand facts."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        980,
+        -420
+      ],
+      "id": "6f4ed7f4-729f-41cd-ac83-1819a461ebf5",
+      "name": "Executive Summary Generator",
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 3000,
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "amount": 1
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        1220,
+        -420
+      ],
+      "id": "ade8d69e-3321-403c-8f66-42462f61250c",
+      "name": "Wait After Executive",
+      "webhookId": "200651d9-344b-4554-a054-1fdf32a524cf"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=CATEGORY: {{ $('Input Parser').first().json.categoryDisplayName }}\nFOCUS: {{ $('Input Parser').first().json.focus || 'general competitive monitoring' }}\nWAYFAIR: {{ JSON.stringify($('Reshape Wayfair Response').first().json.wayfair_products, null, 2) }}\nAMAZON: {{ JSON.stringify($('Reshape Amazon Response').first().json.amazonProducts, null, 2) }}\nWALMART: {{ JSON.stringify($('Reshape Walmart Response').first().json.walmartProducts, null, 2) }}",
+        "options": {
+          "systemMessage": "You are a marketplace analyst. Produce <section class=\"competitor-analysis\"><h2>Competitor Analysis</h2> comparing Amazon and Walmart, with summary metrics, top three products for each in tables using clickable links, and cross-competitor insights. Return one complete semantic HTML <section> only. No markdown fences. Use only supplied evidence; calculate carefully, label missing data, preserve actual product URLs, and do not invent shipping, supplier, material, or brand facts."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        1460,
+        -420
+      ],
+      "id": "acaa6956-1f39-4e7b-8ab3-5a223099d23e",
+      "name": "Competitor Analysis Generator",
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 3000,
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "amount": 1
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        1700,
+        -420
+      ],
+      "id": "12dcc661-37bc-42f5-a173-8eb82f07ce9b",
+      "name": "Wait After Competitor Analysis",
+      "webhookId": "140c805f-2942-4c34-afeb-7ebf5d1b61a1"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=CATEGORY: {{ $('Input Parser').first().json.categoryDisplayName }}\nFOCUS: {{ $('Input Parser').first().json.focus || 'general competitive monitoring' }}\nWAYFAIR: {{ JSON.stringify($('Reshape Wayfair Response').first().json.wayfair_products, null, 2) }}\nAMAZON: {{ JSON.stringify($('Reshape Amazon Response').first().json.amazonProducts, null, 2) }}\nWALMART: {{ JSON.stringify($('Reshape Walmart Response').first().json.walmartProducts, null, 2) }}",
+        "options": {
+          "systemMessage": "You are a competitive-intelligence analyst. Produce <section class=\"competitor-comparison\"><h2>Side-by-Side Comparison</h2> with a Wayfair/Amazon/Walmart table covering price range and average, product count, ratings, review strength and observable assortment cues. Name a data-supported winner or tie for each row and add key takeaways. Return one complete semantic HTML <section> only. No markdown fences. Use only supplied evidence; calculate carefully, label missing data, preserve actual product URLs, and do not invent shipping, supplier, material, or brand facts."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        1940,
+        -420
+      ],
+      "id": "bd2f476b-9240-4dac-8d15-5d3bc590c99b",
+      "name": "Comparison Generator",
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 3000,
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "amount": 1
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        2180,
+        -420
+      ],
+      "id": "717fa761-3411-43ce-894e-9801a4f5d5c9",
+      "name": "Wait After Comparison",
+      "webhookId": "b0a6efd2-f2df-4426-ae21-e5560624c856"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=CATEGORY: {{ $('Input Parser').first().json.categoryDisplayName }}\nFOCUS: {{ $('Input Parser').first().json.focus || 'general competitive monitoring' }}\nWAYFAIR: {{ JSON.stringify($('Reshape Wayfair Response').first().json.wayfair_products, null, 2) }}\nAMAZON: {{ JSON.stringify($('Reshape Amazon Response').first().json.amazonProducts, null, 2) }}\nWALMART: {{ JSON.stringify($('Reshape Walmart Response').first().json.walmartProducts, null, 2) }}",
+        "options": {
+          "systemMessage": "You are a pricing strategist. Produce <section class=\"pricing-whitespace\"><h2>Pricing Insights & Whitespace</h2>. Count products in budget (<$100), mid ($100-$300) and premium ($300+) bands by retailer, identify observed gaps, and prioritize 2 high, 1 medium and 1 exploratory opportunity. Do not infer discounts when list-price data is absent. Return one complete semantic HTML <section> only. No markdown fences. Use only supplied evidence; calculate carefully, label missing data, preserve actual product URLs, and do not invent shipping, supplier, material, or brand facts."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        2420,
+        -420
+      ],
+      "id": "103000ba-9b11-4ec8-910d-f3cf6273d40d",
+      "name": "Pricing & Whitespace Generator",
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 3000,
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "amount": 1
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        2660,
+        -420
+      ],
+      "id": "9ee24c2f-6c5c-444c-8f40-bd5df2ec9633",
+      "name": "Wait After Pricing",
+      "webhookId": "1301f7e1-aa8c-43b6-89fb-69680ad0de3f"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=CATEGORY: {{ $('Input Parser').first().json.categoryDisplayName }}\nEXECUTIVE: {{ $('Executive Summary Generator').first().json.output }}\nCOMPETITOR ANALYSIS: {{ $('Competitor Analysis Generator').first().json.output }}\nCOMPARISON: {{ $('Comparison Generator').first().json.output }}\nPRICING: {{ $('Pricing & Whitespace Generator').first().json.output }}",
+        "options": {
+          "systemMessage": "You are a senior strategy consultant. Produce <section class=\"recommendations\"><h2>Strategic Recommendations</h2> with 2-3 immediate quick wins and 3 longer-term initiatives. Each must name priority, expected impact, rationale, a measurable next step and which competitor signal it addresses. Return one complete semantic HTML <section> only. No markdown fences. Use only supplied evidence; calculate carefully, label missing data, preserve actual product URLs, and do not invent shipping, supplier, material, or brand facts."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        2900,
+        -420
+      ],
+      "id": "b07ee9fe-38f3-47f2-bf9b-3cafc50f05c7",
+      "name": "Recommendations Generator",
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 3000,
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "amount": 1
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        3140,
+        -420
+      ],
+      "id": "75b7c49f-d844-42fb-bd4b-cfbef549722b",
+      "name": "Wait After Recommendations",
+      "webhookId": "220c5dd3-b591-4dd1-a0db-281bcc57506b"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=CATEGORY: {{ $('Input Parser').first().json.categoryDisplayName }}\nFOCUS: {{ $('Input Parser').first().json.focus || 'general competitive monitoring' }}\nWAYFAIR: {{ JSON.stringify($('Reshape Wayfair Response').first().json.wayfair_products, null, 2) }}\nAMAZON: {{ JSON.stringify($('Reshape Amazon Response').first().json.amazonProducts, null, 2) }}\nWALMART: {{ JSON.stringify($('Reshape Walmart Response').first().json.walmartProducts, null, 2) }}",
+        "options": {
+          "systemMessage": "You are a sourcing analyst. Produce <section class=\"supplier-identification\"><h2>Supplier Identification & Sourcing Opportunities</h2>. Identify only brands clearly present in product names, link to supplied listings, flag uncertain brand extraction, and propose sourcing research questions rather than unsupported claims. Return one complete semantic HTML <section> only. No markdown fences. Use only supplied evidence; calculate carefully, label missing data, preserve actual product URLs, and do not invent shipping, supplier, material, or brand facts."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        3380,
+        -420
+      ],
+      "id": "3d336359-58b9-4344-b897-af7b5b070948",
+      "name": "Supplier Identification Generator",
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 3000,
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "const fence=String.fromCharCode(96).repeat(3);const clean=v=>String(v||'').replace(fence+'html','').replace(fence,'').trim();\nconst scope=$('Scope Generator').first().json;\nconst esc=v=>String(v??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\"/g,'&quot;');\nconst arr=v=>Array.isArray(v)?v:[];const wf=arr($('Reshape Wayfair Response').first().json.wayfair_products),am=arr($('Reshape Amazon Response').first().json.amazonProducts),wm=arr($('Reshape Walmart Response').first().json.walmartProducts);\nconst val=(o,keys)=>{for(const k of keys){if(o&&o[k]!=null&&o[k]!=='')return o[k]}return''};const num=v=>{const n=parseFloat(String(v).replace(/[^0-9.]/g,''));return Number.isFinite(n)?n:null};\nconst metrics=a=>{const ps=a.map(x=>num(val(x,['price','current_price','product_price','salePrice']))).filter(x=>x!=null);return{count:a.length,min:ps.length?Math.min(...ps):null,max:ps.length?Math.max(...ps):null,avg:ps.length?ps.reduce((x,y)=>x+y,0)/ps.length:null}};\nconst money=v=>v==null?'Not available':'$'+v.toFixed(2);const link=x=>{const n=esc(val(x,['name','title','product_name'])||'Product');const u=val(x,['url','link','product_url']);return u?'<a href=\"'+esc(u)+'\">'+n+'</a>':n};\nconst list=a=>a.slice(0,3).map(x=>'<li>'+link(x)+' - '+money(num(val(x,['price','current_price','product_price','salePrice'])))+'</li>').join('');const mw=metrics(wf),ma=metrics(am),mm=metrics(wm);\nconst fallbackExecutive='<section class=\"executive-summary\"><h2>Executive Summary</h2><p>This monitoring run compared '+mw.count+' Wayfair, '+ma.count+' Amazon and '+mm.count+' Walmart listings for '+esc(scope.category)+'. The evidence indicates that Wayfair should compete through curated washable-rug discovery, stronger product-confidence signals and disciplined price-band testing rather than an undifferentiated race to the lowest price.</p><ul><li>Observed average prices: Wayfair '+money(mw.avg)+', Amazon '+money(ma.avg)+', Walmart '+money(mm.avg)+'.</li><li>All conclusions are limited to the retrieved educational sample and require validation with current commercial data.</li></ul></section>';\nconst fallbackCompetitor='<section class=\"competitor-analysis\"><h2>Competitor Analysis</h2><h3>Amazon sample</h3><p>'+ma.count+' products; range '+money(ma.min)+' to '+money(ma.max)+'.</p><ol>'+list(am)+'</ol><h3>Walmart sample</h3><p>'+mm.count+' products; range '+money(mm.min)+' to '+money(mm.max)+'.</p><ol>'+list(wm)+'</ol><p><strong>Cross-competitor signal:</strong> Compare assortment breadth and price bands using the linked listings; do not infer margin, availability or conversion from this sample.</p></section>';\nconst fallbackComparison='<section class=\"competitor-comparison\"><h2>Side-by-Side Comparison</h2><table><thead><tr><th>Retailer</th><th>Products</th><th>Price range</th><th>Average price</th></tr></thead><tbody><tr><td>Wayfair</td><td>'+mw.count+'</td><td>'+money(mw.min)+' - '+money(mw.max)+'</td><td>'+money(mw.avg)+'</td></tr><tr><td>Amazon</td><td>'+ma.count+'</td><td>'+money(ma.min)+' - '+money(ma.max)+'</td><td>'+money(ma.avg)+'</td></tr><tr><td>Walmart</td><td>'+mm.count+'</td><td>'+money(mm.min)+' - '+money(mm.max)+'</td><td>'+money(mm.avg)+'</td></tr></tbody></table><p>Price leadership in this sample belongs to the retailer with the lowest observed average; assortment leadership is assessed only by retrieved product count.</p></section>';\nconst fallbackPricing='<section class=\"pricing-whitespace\"><h2>Pricing Insights & Whitespace</h2><p>Use the observed price ranges above to test a focused washable-rug assortment across entry, mid and premium bands. High priority: strengthen discovery and value communication in the sub-$150 range. Medium priority: validate differentiated designs in the $150-$300 band. Exploratory: test premium materials only after margin and conversion validation.</p></section>';\nconst fallbackRecommendations='<section class=\"recommendations\"><h2>Strategic Recommendations</h2><h3>Immediate quick wins</h3><ol><li><strong>High priority:</strong> create a washable-rug landing page with a prominent washable filter and size guide; measure filter use, product-detail clicks and add-to-cart rate.</li><li><strong>High priority:</strong> test a curated $80-$150 assortment against the observed competitor price signal; measure conversion and contribution margin.</li><li><strong>Medium priority:</strong> add clearer care, backing and room-fit content; measure return-related contacts and review sentiment.</li></ol><h3>Longer-term initiatives</h3><ol><li>Build a weekly competitor-monitoring dashboard using this workflow.</li><li>Develop supplier scorecards for washable construction, lead time, compliance and margin.</li><li>Run controlled assortment experiments before scaling inventory.</li></ol></section>';\nconst brands=[...am,...wm].map(x=>String(val(x,['brand','manufacturer'])||val(x,['name','title','product_name'])).trim()).filter(Boolean).slice(0,6);const fallbackSuppliers='<section class=\"supplier-identification\"><h2>Supplier Identification & Sourcing Opportunities</h2><p>Potential brand or listing-name leads visible in the retrieved sample:</p><ul>'+brands.map(esc).map(x=>'<li>'+x+' <em>(verify brand ownership and supplier relationship)</em></li>').join('')+'</ul><p>Next sourcing questions: Is washable performance independently verified? What are MOQs, landed cost, lead time, defect rate, compliance documentation and channel-conflict terms? No supplier relationship is inferred from a retail listing.</p></section>';\nconst pick=(v,f)=>{const c=clean(v);return c&&c.includes('<section')?c:f};\nconst sections=[scope.html,pick($('Executive Summary Generator').first().json.output,fallbackExecutive),pick($('Competitor Analysis Generator').first().json.output,fallbackCompetitor),pick($('Comparison Generator').first().json.output,fallbackComparison),pick($('Pricing & Whitespace Generator').first().json.output,fallbackPricing),pick($('Recommendations Generator').first().json.output,fallbackRecommendations),pick($('Supplier Identification Generator').first().json.output,fallbackSuppliers)];\nconst css=':root{--p:#7b2cbf;--ink:#1f2937;--muted:#6b7280;--bg:#f6f4f8}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.6 Arial,sans-serif}.wrap{max-width:1080px;margin:auto;padding:30px}.hero{padding:44px;border-radius:20px;background:linear-gradient(135deg,#4c1d95,#9333ea);color:white}.hero h1{margin:0;font-size:38px}section{background:white;margin:22px 0;padding:28px;border-radius:14px;box-shadow:0 2px 14px #00000012}h2{color:#5b21b6;border-bottom:2px solid #ede9fe;padding-bottom:10px}h3{color:#374151}table{width:100%;border-collapse:collapse;margin:16px 0}th,td{border:1px solid #ddd;padding:10px;vertical-align:top;text-align:left}th{background:#f3e8ff}.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}.stats div{background:#faf5ff;padding:16px;border-radius:10px}.stats span{display:block;font-size:20px;color:#6b21a8}a{color:#6d28d9}.notice{background:#fff7ed;border-left:4px solid #f59e0b;padding:14px}footer{padding:20px;color:var(--muted);text-align:center}@media(max-width:700px){.stats{grid-template-columns:1fr}.wrap{padding:12px}table{font-size:12px}}';\nconst title=scope.category+' Competitor Monitoring Report';\nconst html='<!doctype html><html><head><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width\"><title>'+title+'</title><style>'+css+'</style></head><body><div class=\"wrap\"><header class=\"hero\"><h1>'+title+'</h1><p>Wayfair vs Amazon vs Walmart</p><small>Generated '+new Date().toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'})+'</small></header><p class=\"notice\"><strong>Decision note:</strong> This analysis uses a limited educational dataset. Validate recommendations with current catalog, margin, conversion and supplier data before action.</p><main>'+sections.join('')+'</main><footer>Wayfair × Extern educational project • Human review required</footer></div></body></html>';\nreturn [{json:{html,title,category:scope.category,sectionCount:sections.filter(Boolean).length,generatedAt:new Date().toISOString()}}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3620,
+        -420
+      ],
+      "id": "a54055d3-9226-4fb5-9d95-25cdfe5a91e9",
+      "name": "Assemble Final Report"
+    },
+    {
+      "parameters": {
+        "jsCode": "const x=$input.first().json,h=x.html||'';const required=['Scope of Research','Executive Summary','Competitor Analysis','Side-by-Side Comparison','Pricing Insights','Strategic Recommendations','Supplier Identification'];const missing=required.filter(s=>!h.includes(s));return [{json:{...x,validation:{isValid:missing.length===0&&h.includes('</html>'),requiredSections:required.length,missing,warnings:h.includes('undefined')?['Undefined value detected']:[]}}}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3860,
+        -420
+      ],
+      "id": "cc87b018-71e2-4ab3-8887-b03e396cf0fe",
+      "name": "Validate Final Report"
+    },
+    {
+      "parameters": {
+        "jsCode": "const x=$input.first().json;const slug=String(x.category||'rug').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');const fileName=slug+'-competitor-monitoring-report-'+new Date().toISOString().slice(0,10)+'.html';return [{json:{fileName,category:x.category,sectionCount:x.sectionCount,validation:x.validation,generatedAt:x.generatedAt},binary:{data:{data:Buffer.from(x.html).toString('base64'),mimeType:'text/html',fileName}}}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        4100,
+        -420
+      ],
+      "id": "dcaaa2f9-141e-44b6-986f-4998cec8de8f",
+      "name": "Download Final Report"
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-3.8-flash",
+        "options": {
+          "temperature": 0.2
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        2300,
+        -120
+      ],
+      "id": "a088afc8-ca7b-44c7-ba4e-1e69f3207863",
+      "name": "Google Gemini - Competitive Analysis",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "nIhJuI7VZdMJdETs",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## Stages 5–6: Analyze, Assemble & Deliver\nGenerate six evidence-grounded competitive-analysis sections with Gemini, assemble a responsive HTML report, validate required content and emit a downloadable file.",
+        "height": 700,
+        "width": 3900,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        360,
+        -700
+      ],
+      "id": "6a222897-5a43-4c4c-9d37-7ff6086d0676",
+      "name": "Stages 5-6 Note"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "Input Parser",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Input Parser": {
+      "main": [
+        [
+          {
+            "node": "Fetch Wayfair Products",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Fetch Amazon Products",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Fetch Walmart Products",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch Wayfair Products": {
+      "main": [
+        [
+          {
+            "node": "Reshape Wayfair Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Reshape Wayfair Response": {
+      "main": [
+        [
+          {
+            "node": "Merge Retailer Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch Amazon Products": {
+      "main": [
+        [
+          {
+            "node": "Reshape Amazon Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Reshape Amazon Response": {
+      "main": [
+        [
+          {
+            "node": "Merge Retailer Data",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Fetch Walmart Products": {
+      "main": [
+        [
+          {
+            "node": "Reshape Walmart Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Reshape Walmart Response": {
+      "main": [
+        [
+          {
+            "node": "Merge Retailer Data",
+            "type": "main",
+            "index": 2
+          }
+        ]
+      ]
+    },
+    "Merge Retailer Data": {
+      "main": [
+        [
+          {
+            "node": "Scope Generator",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Scope Generator": {
+      "main": [
+        [
+          {
+            "node": "Wait After Scope",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait After Scope": {
+      "main": [
+        [
+          {
+            "node": "Executive Summary Generator",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Executive Summary Generator": {
+      "main": [
+        [
+          {
+            "node": "Wait After Executive",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait After Executive": {
+      "main": [
+        [
+          {
+            "node": "Competitor Analysis Generator",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Competitor Analysis Generator": {
+      "main": [
+        [
+          {
+            "node": "Wait After Competitor Analysis",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait After Competitor Analysis": {
+      "main": [
+        [
+          {
+            "node": "Comparison Generator",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Comparison Generator": {
+      "main": [
+        [
+          {
+            "node": "Wait After Comparison",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait After Comparison": {
+      "main": [
+        [
+          {
+            "node": "Pricing & Whitespace Generator",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pricing & Whitespace Generator": {
+      "main": [
+        [
+          {
+            "node": "Wait After Pricing",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait After Pricing": {
+      "main": [
+        [
+          {
+            "node": "Recommendations Generator",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Recommendations Generator": {
+      "main": [
+        [
+          {
+            "node": "Wait After Recommendations",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait After Recommendations": {
+      "main": [
+        [
+          {
+            "node": "Supplier Identification Generator",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Supplier Identification Generator": {
+      "main": [
+        [
+          {
+            "node": "Assemble Final Report",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Assemble Final Report": {
+      "main": [
+        [
+          {
+            "node": "Validate Final Report",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validate Final Report": {
+      "main": [
+        [
+          {
+            "node": "Download Final Report",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini - Competitive Analysis": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Executive Summary Generator",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "Competitor Analysis Generator",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "Comparison Generator",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "Pricing & Whitespace Generator",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "Recommendations Generator",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "Supplier Identification Generator",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "76455c70-35fc-4ff8-880b-8741bff499f2",
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "tags": []
+}
