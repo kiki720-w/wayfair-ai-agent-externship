@@ -1,8 +1,8 @@
-# Wayfair × Extern — AI Market Intelligence Agent Portfolio
+# Wayfair AI Market Intelligence Agent Project
 
-Portfolio archive for the **Wayfair n8n AI Agent Engineering Externship**. The first completed artifact is an importable n8n Prompt Generator that transforms a short rug-design idea into a structured, image-generation-ready moodboard prompt.
+An AI market intelligence project built with **n8n and Google Gemini**. The project includes an importable n8n Prompt Generator that transforms a short rug-design idea into a structured, image-generation-ready moodboard prompt.
 
-> This repository documents an Extern project completed through Extern in collaboration with Wayfair. It does not represent employment by Wayfair, an official Wayfair product, or production Wayfair software.
+This repository contains the project's workflows, documentation, evaluation materials, and generated outputs.
 
 ## Current deliverable
 
@@ -43,7 +43,7 @@ The system message requires the agent to produce:
 
    `bohemian rugs, neutral tones`
 
-6. Save screenshots of the workflow and generated output for the Extern submission.
+6. Save screenshots of the workflow and generated output for project documentation.
 
 Never commit an API key. Credentials are stored inside n8n; `.env.example` is documentation only.
 
@@ -58,7 +58,7 @@ On 27 September 2026, the complete workflow was run successfully against Gemini 
 - `bohemian rugs, neutral tones`
 - `green botanical rug for a sunlit modern living room`
 
-Ready-to-submit sample outputs and the reflection are in [docs/extern-submission.md](docs/extern-submission.md).
+Project sample outputs and evaluation notes are in [docs/extern-submission.md](docs/extern-submission.md).
 
 The Project 2 planning artifact is documented in [docs/project-2-step-1.md](docs/project-2-step-1.md), including a four-block workflow sketch for the Area Rugs market-trend agent.
 
@@ -68,11 +68,11 @@ The final Area Rug trend report is in [output/pdf/area-rug-trend-report-2026-09-
 
 Project 3 competitor monitoring Stages 1–4 are available in [workflows/project-3-stage-1-4.json](workflows/project-3-stage-1-4.json), with implementation and test evidence in [docs/project-3-step-2.md](docs/project-3-step-2.md). The verified run collected 10 products each from Wayfair, Amazon and Walmart and merged the three branches into one downstream item.
 
-The complete Project 3 Stages 1–6 agent is available in [workflows/project-3-competitor-monitoring-agent.json](workflows/project-3-competitor-monitoring-agent.json), with implementation decisions and submission answers in [docs/project-3-step-3.md](docs/project-3-step-3.md). Its verified 27-node run produced all 7 required sections, passed validation with no missing content or warnings, and supports deterministic evidence-based fallbacks during transient model rate limits. The final five-page report is [output/pdf/wayfair-competitor-monitoring-report.pdf](output/pdf/wayfair-competitor-monitoring-report.pdf).
+The complete Project 3 Stages 1–6 agent is available in [workflows/project-3-competitor-monitoring-agent.json](workflows/project-3-competitor-monitoring-agent.json), with implementation decisions and project notes in [docs/project-3-step-3.md](docs/project-3-step-3.md). Its verified 27-node run produced all 7 required sections, passed validation with no missing content or warnings, and supports deterministic evidence-based fallbacks during transient model rate limits. The final five-page report is [output/pdf/wayfair-competitor-monitoring-report.pdf](output/pdf/wayfair-competitor-monitoring-report.pdf).
 
 Project 4 begins with the importable [Content Strategy Agent](workflows/project-4-content-strategy-agent.json). Step 1 adaptation and end-to-end test evidence are documented in [docs/project-4-step-1.md](docs/project-4-step-1.md). The A+B+C enhancement blueprint, node-level changes, evaluation design, and submitted Google Doc are documented in [docs/project-4-step-2.md](docs/project-4-step-2.md).
 
-Project 4 Step 3 is complete. The enhanced nine-node workflow is in [workflows/project-4-enhanced-content-strategy-agent.json](workflows/project-4-enhanced-content-strategy-agent.json), with test evidence, Extern answers, and a five-minute recording script in [docs/project-4-step-3.md](docs/project-4-step-3.md). Verified execution 32 produced the visually checked 14-page [Wayfair Enhanced Content Strategy Report](output/pdf/wayfair-enhanced-content-strategy-report.pdf), including schema and semantic category-grounding safeguards.
+Project 4 Step 3 is complete. The enhanced nine-node workflow is in [workflows/project-4-enhanced-content-strategy-agent.json](workflows/project-4-enhanced-content-strategy-agent.json), with test evidence, project notes, and a five-minute recording script in [docs/project-4-step-3.md](docs/project-4-step-3.md). Verified execution 32 produced the visually checked 14-page [Wayfair Enhanced Content Strategy Report](output/pdf/wayfair-enhanced-content-strategy-report.pdf), including schema and semantic category-grounding safeguards.
 
 Project 5 Step 1 is documented in [docs/project-5-step-1.md](docs/project-5-step-1.md). The exercise produced a responsive single-file [AI Product Progress Dashboard](sites/ai-product-portfolio-dashboard/dist/index.html), plus the two standalone inputs required by the Dashboard Builder Agent: the [Project 2 market-trend HTML](output/html/area-rug-market-trend-report.html) and [Project 3 competitor-analysis HTML](output/html/wayfair-competitor-analysis-report.html). Project 5 requires no OAuth login, API key, or external credential.
 
@@ -94,7 +94,7 @@ The product framing, metrics, risks, and evaluation plan are documented in [docs
 - [x] Prompt Generator workflow scaffold
 - [x] JSON parsed and imported successfully in n8n 2.40.7
 - [x] System prompt and sample inputs
-- [x] Submission-ready document draft
+- [x] Project documentation draft
 - [x] Initial evaluation rubric
 - [x] Connect the user's Gemini credential in local n8n (credential is not stored in Git)
 - [x] Execute the end-to-end workflow successfully with Gemini 3.8 Flash
