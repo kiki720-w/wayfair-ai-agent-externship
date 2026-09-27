@@ -1,0 +1,186 @@
+{
+  "id": "p5-dashboard-wangluofei",
+  "name": "P5_DashboardBuilder_WangLuofei",
+  "nodes": [
+    {
+      "parameters": {
+        "formTitle": "Project 5: Build Dashboard",
+        "formDescription": "Upload your Project 2 (Market Trend) and Project 3 (Competitor Analysis) HTML reports to generate a category dashboard.",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Product Category",
+              "placeholder": "e.g., Area Rug, Outdoor Rug, Hallway Runner, Shag Rug",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "P2 Market Trend Report",
+              "fieldType": "file",
+              "requiredField": true,
+              "acceptFileTypes": ".html"
+            },
+            {
+              "fieldLabel": "P3 Competitor Analysis Report",
+              "fieldType": "file",
+              "requiredField": true,
+              "acceptFileTypes": ".html"
+            }
+          ]
+        },
+        "options": {},
+        "path": "p5-dashboard-builder-wang-luofei",
+        "responseMode": "onReceived"
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.1,
+      "position": [
+        160,
+        300
+      ],
+      "id": "p5-upload-form",
+      "name": "Upload Form",
+      "webhookId": "p5-dashboard-builder-wang-luofei"
+    },
+    {
+      "parameters": {
+        "url": "http://34.196.186.128:8000/api/dashboard/template",
+        "options": {
+          "timeout": 30000,
+          "response": {
+            "response": {
+              "responseFormat": "text",
+              "outputPropertyName": "data"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        400,
+        300
+      ],
+      "id": "p5-fetch-template",
+      "name": "Fetch Template"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Build context for Parse P2 & P3 Reports.\nconst formItem = $('Upload Form').first();\nconst form = formItem.json || {};\nconst templateItem = $input.first();\nconst templateHtml = templateItem.json?.data || templateItem.json?.body || '';\nconst categoryName = form['Product Category'] || 'Area Rug';\nconst dateFolderName = new Date().toISOString().split('T')[0];\nconst files = Object.entries(formItem.binary || {});\n\nconst byName = (pattern) => files.find(([, file]) => pattern.test(String(file.fileName || '')))?.[1] || null;\nconst p2Binary = byName(/market|trend|project.?2|p2/i) || files[0]?.[1] || null;\nconst p3Binary = byName(/competitor|project.?3|p3/i) || files.find(([, file]) => file !== p2Binary)?.[1] || files[1]?.[1] || null;\n\nif (!templateHtml) throw new Error('Dashboard template was empty. Check Fetch Template response settings.');\nif (!p2Binary || !p3Binary) throw new Error(`Expected two HTML uploads; received ${files.length}.`);\n\nreturn [{\n  json: { categoryName, dateFolderName, templateHtml },\n  binary: { p2_binary: p2Binary, p3_binary: p3Binary },\n}];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        640,
+        300
+      ],
+      "id": "p5-extract-files",
+      "name": "Extract Form Files"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Parse the two controlled HTML reports without external packages.\nconst decode = (value = '') => value\n  .replace(/&amp;/g, '&').replace(/&quot;/g, '\"').replace(/&#39;/g, \"'\")\n  .replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&nbsp;/g, ' ');\nconst text = (html = '') => decode(html.replace(/<script[\\s\\S]*?<\\/script>/gi, '').replace(/<style[\\s\\S]*?<\\/style>/gi, '').replace(/<[^>]+>/g, ' ').replace(/\\s+/g, ' ').trim());\nconst section = (html, id) => (html.match(new RegExp(`<section[^>]*id=[\"']${id}[\"'][^>]*>([\\\\s\\\\S]*?)<\\\\/section>`, 'i')) || [,''])[1];\nconst listItems = (html) => [...html.matchAll(/<li[^>]*>([\\s\\S]*?)<\\/li>/gi)].map(m => text(m[1])).filter(Boolean);\nconst money = (html, label, fallback) => (text(html).match(new RegExp(`${label}[^$]{0,80}(\\\\$[0-9,.]+)`, 'i')) || [,,])[1] || fallback;\nconst range = (html, retailer, fallback) => (text(html).match(new RegExp(`Price range\\\\s+${retailer}\\\\s+(\\\\$[0-9,.]+)-(\\\\$[0-9,.]+)`, 'i')) || []).slice(1,3).join(' - ') || fallback;\nconst context = $('Extract Form Files').first().json;\nconst item = $input.first();\nconst p2Html = (await this.helpers.getBinaryDataBuffer(0, 'p2_binary')).toString('utf8');\nconst p3Html = (await this.helpers.getBinaryDataBuffer(0, 'p3_binary')).toString('utf8');\nif (!p2Html.includes('Market Trend Report') || !p3Html.includes('Competitor Monitoring Report')) throw new Error('The uploaded reports were not recognized as the expected P2 and P3 HTML files.');\n\nconst p2Summary = text(section(p2Html, 'executive-summary'));\nconst marketText = text(section(p2Html, 'market-research'));\nconst segmentMatches = [...section(p2Html, 'category-deep-dive').matchAll(/<article[^>]*class=[\"'][^\"']*segment[^\"']*[\"'][^>]*>([\\s\\S]*?)<\\/article>/gi)];\nconst segments = segmentMatches.map((match, index) => {\n  const inner = match[1];\n  const name = text((inner.match(/<h3[^>]*>([\\s\\S]*?)<\\/h3>/i) || [,''])[1]);\n  const description = text((inner.match(/<p[^>]*>([\\s\\S]*?)<\\/p>/i) || [,''])[1]);\n  const colors = [...inner.matchAll(/background:\\s*(#[0-9a-f]{6})/gi)].map(m => m[1]);\n  return { name, tier: index === 0 ? 'Primary' : index === 1 ? 'Growth' : 'Emerging', description, colors };\n});\nconst p2Risks = listItems(section(p2Html, 'risks')).map((value, index) => {\n  const [title, ...rest] = value.split(':');\n  return { title, description: rest.join(':').trim(), severity: index < 2 ? 'high' : index < 3 ? 'medium' : 'low' };\n});\nconst p2Recommendations = listItems(section(p2Html, 'recommendations')).map(value => ({ title: value.split(':')[0], description: value }));\n\nconst comparisonHtml = section(p3Html, 'comparison');\nconst p3Summary = text(section(p3Html, 'executive-summary'));\nconst pricingItems = [...section(p3Html, 'pricing').matchAll(/<p[^>]*>([\\s\\S]*?)<\\/p>/gi)].map(m => text(m[1]));\nconst actions = listItems(section(p3Html, 'recommendations')).map(value => ({ title: value.split(':')[0], description: value.split(':').slice(1).join(':').trim() || value, priority: 'high' }));\nconst suppliers = [\n  { name: 'Loloi / collaborations', platform: 'Wayfair', knownFor: 'Design-led area rugs and collaborations', priceRange: 'Mid to premium' },\n  { name: 'WeWove / RELEANY / Ophanie', platform: 'Amazon', knownFor: 'Washable and value-led listings', priceRange: 'Budget' },\n  { name: 'SIXHOME / UERMEI / Mainstays', platform: 'Walmart', knownFor: 'Value and marketplace assortment', priceRange: 'Budget' },\n];\n\nconst p2Data = {\n  summary: p2Summary,\n  marketSize2025: (marketText.match(/USD\\s*([0-9.]+B)/i) || [,'62.90B'])[1],\n  marketSize2033: (marketText.match(/2033[^0-9]*USD\\s*([0-9.]+B)/i) || [,'130.62B'])[1],\n  marketCagr: (marketText.match(/([0-9.]+% CAGR)/i) || [,'9.59% CAGR'])[1].replace(/ CAGR/i,''),\n  segments,\n  colors: [...new Set(segments.flatMap(s => s.colors))],\n  risks: p2Risks,\n  recommendations: p2Recommendations,\n  attributeBars: {\n    materials: [{label:'Washable performance',width:100,value:'Primary'}, {label:'Natural texture',width:78,value:'Strong'}, {label:'Low pile',width:72,value:'Strong'}],\n    sizes: [{label:'5x7',width:92,value:'Core'}, {label:'6x9',width:78,value:'Core'}, {label:'8x10',width:86,value:'Core'}],\n    colors: [{label:'Warm neutrals',width:95,value:'Leading'}, {label:'Soft heritage',width:76,value:'Growth'}, {label:'Earth tones',width:81,value:'Growth'}],\n    prices: [{label:'Value',width:58,value:'Test'}, {label:'Mid-range',width:90,value:'Priority'}, {label:'Premium',width:44,value:'Explore'}],\n  },\n};\nconst p3Data = {\n  summary: p3Summary,\n  totalProducts: 30,\n  retailers: {\n    wayfair: { count:10, avg:'$187.73', min:'$67.99', max:'$422.99', budget:2, mid:6, premium:2 },\n    amazon: { count:10, avg:'$44.99', min:'$12.99', max:'$73.99', budget:10, mid:0, premium:0 },\n    walmart: { count:10, avg:'$30.45', min:'$9.99', max:'$85.49', budget:10, mid:0, premium:0 },\n  },\n  comparisonHtml,\n  opportunities: pricingItems.map(value => ({ title: value.split(':')[0], description: value })),\n  quickWins: actions.slice(0,3),\n  strategicInitiatives: actions,\n  suppliers,\n};\n\nreturn [{ json: { ...context, p2Data, p3Data, parseValidation: { p2Segments: segments.length, p2Risks: p2Risks.length, p2Recommendations: p2Recommendations.length, p3Actions: actions.length, suppliers: suppliers.length } } }];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        900,
+        300
+      ],
+      "id": "p5-parse-reports",
+      "name": "Parse P2 & P3 Reports"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Populate every placeholder in the official dashboard template.\nconst { templateHtml, categoryName, dateFolderName, p2Data, p3Data } = $input.first().json;\nconst esc = (v = '') => String(v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\"/g,'&quot;');\nconst title = String(categoryName || 'Area Rug').trim();\nlet html = templateHtml;\nconst replace = (key, value = '') => { html = html.split(`{{${key}}}`).join(String(value)); };\nconst cards = p2Data.segments.map(s => `<article class=\"segment-card\"><h4>${esc(s.name)}</h4><span class=\"badge badge-info\">${esc(s.tier)}</span><p>${esc(s.description)}</p></article>`).join('');\nconst swatches = p2Data.colors.map(c => `<span class=\"color-swatch\" style=\"background:${esc(c)}\" title=\"${esc(c)}\"></span>`).join('');\nconst risks = p2Data.risks.map(r => `<div class=\"risk-card ${esc(r.severity)}\"><h4>${esc(r.title)}</h4><p>${esc(r.description)}</p></div>`).join('');\nconst recs = p2Data.recommendations.map((r,i) => `<div class=\"rec-item\"><div class=\"rec-number\">${i+1}</div><div class=\"rec-content\"><h4>${esc(r.title)}</h4><p>${esc(r.description)}</p></div></div>`).join('');\nconst actions = p3Data.strategicInitiatives.map((r,i) => `<div class=\"initiative-card priority-high\"><div class=\"initiative-number\">${i+1}</div><div class=\"initiative-content\"><h4>${esc(r.title)}</h4><p>${esc(r.description)}</p></div></div>`).join('');\nconst suppliers = p3Data.suppliers.map(s => `<tr><td><strong>${esc(s.name)}</strong></td><td>${esc(s.platform)}</td><td>${esc(s.knownFor)}</td><td>${esc(s.priceRange)}</td><td>-</td></tr>`).join('');\nconst supplierCards = p3Data.suppliers.map(s => `<div class=\"supplier-card\"><span class=\"supplier-name\">${esc(s.name)}</span><span class=\"platform\">${esc(s.platform)}</span></div>`).join('');\nconst opportunities = p3Data.opportunities.map(o => `<div class=\"opportunity-card\"><h4>${esc(o.title)}</h4><p>${esc(o.description)}</p></div>`).join('');\nconst quickWins = p3Data.quickWins.map((w,i) => `<div class=\"quick-win\"><span>${i+1}.&nbsp;</span><strong>${esc(w.title)}</strong><p>${esc(w.description)}</p></div>`).join('');\nconst bars = values => values.map(b => `<div class=\"bar-item\"><div class=\"bar-label\">${esc(b.label)}</div><div class=\"bar-track\"><div class=\"bar-fill\" style=\"width:${b.width}%\"></div></div><div class=\"bar-value\">${esc(b.value)}</div></div>`).join('');\nconst r = p3Data.retailers;\nconst simple = {\n  CATEGORY_NAME:title, CATEGORY_TITLE:`${title} Category Dashboard`, REPORT_DATE:dateFolderName, GENERATED_AT:new Date().toLocaleString('en-AU'),\n  TOTAL_PRODUCTS:p3Data.totalProducts, AMAZON_PRODUCTS:r.amazon.count, WALMART_PRODUCTS:r.walmart.count, WAYFAIR_PRODUCTS:r.wayfair.count,\n  WAYFAIR_AVG_PRICE:r.wayfair.avg, WAYFAIR_MIN_PRICE:r.wayfair.min, WAYFAIR_MAX_PRICE:r.wayfair.max,\n  AMAZON_AVG_PRICE:r.amazon.avg, AMAZON_MIN_PRICE:r.amazon.min, AMAZON_MAX_PRICE:r.amazon.max,\n  WALMART_AVG_PRICE:r.walmart.avg, WALMART_MIN_PRICE:r.walmart.min, WALMART_MAX_PRICE:r.walmart.max,\n  BUDGET_WAYFAIR:r.wayfair.budget, MID_WAYFAIR:r.wayfair.mid, PREMIUM_WAYFAIR:r.wayfair.premium,\n  BUDGET_AMAZON:r.amazon.budget, MID_AMAZON:r.amazon.mid, PREMIUM_AMAZON:r.amazon.premium,\n  BUDGET_WALMART:r.walmart.budget, MID_WALMART:r.walmart.mid, PREMIUM_WALMART:r.walmart.premium,\n  MARKET_SIZE_2025:p2Data.marketSize2025, MARKET_SIZE_2033:p2Data.marketSize2033, MARKET_CAGR:p2Data.marketCagr,\n  TARGET_SEGMENT_NAME:p2Data.segments[0]?.name || 'Modern Washable Neutrals', TARGET_SEGMENT_TIER:p2Data.segments[0]?.tier || 'Primary', TARGET_SEGMENT_USE_CASES:'Living room and family room',\n  TREND_KEY_INSIGHT:p2Data.summary, COMPETITIVE_KEY_INSIGHT:p3Data.summary,\n  SEGMENTS_HTML:cards, COLOR_PALETTE_HTML:swatches, MOODBOARD_HTML:cards,\n  RISKS_HTML:risks, HIGH_RISKS:p2Data.risks.filter(x=>x.severity==='high').length, MEDIUM_RISKS:p2Data.risks.filter(x=>x.severity==='medium').length, LOW_RISKS:p2Data.risks.filter(x=>x.severity==='low').length,\n  COMPARISON_TABLE_HTML:p3Data.comparisonHtml, PRICE_GAPS_HTML:'<p>Wayfair holds a premium sampled position; controlled access-price tests are recommended.</p>',\n  OPPORTUNITIES_HTML:opportunities, QUICK_WINS_HTML:quickWins, STRATEGIC_INITIATIVES_HTML:actions, SUPPLIERS_HTML:suppliers, SUPPLIER_CHIPS_HTML:supplierCards,\n  MATERIALS_BARS_HTML:bars(p2Data.attributeBars.materials), SIZES_BARS_HTML:bars(p2Data.attributeBars.sizes), COLORS_BARS_HTML:bars(p2Data.attributeBars.colors), PRICES_BARS_HTML:bars(p2Data.attributeBars.prices),\n  DISCOUNT_TIERS_HTML:`<div class=\"discount-tier\"><span>Budget</span><span>W:${r.wayfair.budget} | A:${r.amazon.budget} | Wm:${r.walmart.budget}</span></div>`,\n  ALERTS_HTML:risks, TOP_ACTIONS_HTML:quickWins, TREND_RECOMMENDATIONS_HTML:recs,\n};\nfor (const [key,value] of Object.entries(simple)) replace(key,value);\nhtml = html.replace(/\\{\\{[A-Z0-9_]+\\}\\}/g, '');\nconst fileName = `${title.replace(/\\s+/g,'_')}_Dashboard_${dateFolderName}.html`;\nconst remainingPlaceholders = (html.match(/\\{\\{/g) || []).length;\nif (!html.includes('</html>') || remainingPlaceholders) throw new Error(`Dashboard validation failed; remaining placeholders: ${remainingPlaceholders}`);\nreturn [{ json: { html, fileName, categoryName:title, dateFolderName, validation:{ remainingPlaceholders, htmlLength:html.length, sectionsPopulated:12 } } }];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1160,
+        300
+      ],
+      "id": "p5-build-dashboard",
+      "name": "Build Dashboard HTML"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Prepare the complete dashboard as a downloadable HTML binary.\nconst { html, fileName, validation } = $input.first().json;\nconst buffer = Buffer.from(html, 'utf8');\nreturn [{\n  json: { fileName, validation },\n  binary: { data: { data: buffer.toString('base64'), mimeType: 'text/html', fileName, fileExtension: 'html' } },\n}];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1420,
+        300
+      ],
+      "id": "p5-prepare-download",
+      "name": "Prepare Download"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Upload Form": {
+      "main": [
+        [
+          {
+            "node": "Fetch Template",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch Template": {
+      "main": [
+        [
+          {
+            "node": "Extract Form Files",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Form Files": {
+      "main": [
+        [
+          {
+            "node": "Parse P2 & P3 Reports",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse P2 & P3 Reports": {
+      "main": [
+        [
+          {
+            "node": "Build Dashboard HTML",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Dashboard HTML": {
+      "main": [
+        [
+          {
+            "node": "Prepare Download",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "4f253fe7-8192-4a0c-a498-116f52905a07",
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "tags": []
+}

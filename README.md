@@ -76,6 +76,8 @@ Project 4 Step 3 is complete. The enhanced nine-node workflow is in [workflows/p
 
 Project 5 Step 1 is documented in [docs/project-5-step-1.md](docs/project-5-step-1.md). The exercise produced a responsive single-file [AI Product Progress Dashboard](sites/ai-product-portfolio-dashboard/dist/index.html), plus the two standalone inputs required by the Dashboard Builder Agent: the [Project 2 market-trend HTML](output/html/area-rug-market-trend-report.html) and [Project 3 competitor-analysis HTML](output/html/wayfair-competitor-analysis-report.html). Project 5 requires no OAuth login, API key, or external credential.
 
+Project 5 Step 2 is complete and documented in [docs/project-5-step-2.md](docs/project-5-step-2.md). The six-node [Dashboard Builder Agent](workflows/project-5-dashboard-builder-agent.json) was imported into n8n and successfully executed with both reports. Its visually verified final output is [Area Rug Dashboard](output/html/Area_Rug_Dashboard_2026-09-27.html), with all official template placeholders resolved.
+
 ## Product direction
 
 This first workflow is the input-quality layer of a broader AI market-intelligence product for a rugs category team:
@@ -110,6 +112,9 @@ The product framing, metrics, risks, and evaluation plan are documented in [docs
 - [x] Create the workflow JSON Google Doc
 - [x] Complete Project 5 Step 1 dashboard exercise and prerequisite check
 - [x] Preserve Project 2 and Project 3 reports as standalone HTML inputs
+- [x] Build and import the six-node Project 5 Dashboard Builder Agent
+- [x] Run both HTML reports through the agent successfully
+- [x] Generate and visually verify the final Area Rug category dashboard
 - [ ] Record the required approximately five-minute walkthrough
 - [ ] Set the video and workflow JSON links to anyone-with-link view access
 - [ ] Submit the Project 4 Step 3 form
