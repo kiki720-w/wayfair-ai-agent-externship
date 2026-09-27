@@ -72,6 +72,8 @@ The complete Project 3 Stages 1–6 agent is available in [workflows/project-3-c
 
 Project 4 begins with the importable [Content Strategy Agent](workflows/project-4-content-strategy-agent.json). Step 1 adaptation and end-to-end test evidence are documented in [docs/project-4-step-1.md](docs/project-4-step-1.md). The A+B+C enhancement blueprint, node-level changes, evaluation design, and submitted Google Doc are documented in [docs/project-4-step-2.md](docs/project-4-step-2.md).
 
+Project 4 Step 3 is complete. The enhanced nine-node workflow is in [workflows/project-4-enhanced-content-strategy-agent.json](workflows/project-4-enhanced-content-strategy-agent.json), with test evidence, Extern answers, and a five-minute recording script in [docs/project-4-step-3.md](docs/project-4-step-3.md). Verified execution 32 produced the visually checked 14-page [Wayfair Enhanced Content Strategy Report](output/pdf/wayfair-enhanced-content-strategy-report.pdf), including schema and semantic category-grounding safeguards.
+
 ## Product direction
 
 This first workflow is the input-quality layer of a broader AI market-intelligence product for a rugs category team:
@@ -101,4 +103,9 @@ The product framing, metrics, risks, and evaluation plan are documented in [docs
 - [x] Complete Project 3 Stages 5–6 analysis, validation and final report delivery
 - [x] Import, adapt, and verify the Project 4 Content Strategy Agent
 - [x] Create and submit the Project 4 enhancement plan
-- [ ] Record the required 1-3 minute Loom walkthrough
+- [x] Build and test the Project 4 enhancement
+- [x] Export and visually verify the final 14-page PDF report
+- [x] Create the workflow JSON Google Doc
+- [ ] Record the required approximately five-minute walkthrough
+- [ ] Set the video and workflow JSON links to anyone-with-link view access
+- [ ] Submit the Project 4 Step 3 form

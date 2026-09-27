@@ -1,0 +1,285 @@
+{
+  "name": "P4_Enhanced_Content_Strategy_WangLuofei",
+  "nodes": [
+    {
+      "parameters": {
+        "formTitle": "Wayfair AI Content Strategy Copilot",
+        "formDescription": "Upload market and competitor reports, then define the audience and campaign context for a Wayfair-ready content strategy.",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Product Category",
+              "placeholder": "e.g., Area Rug",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Focus Area",
+              "placeholder": "e.g., Washable & Value-Driven",
+              "requiredField": false
+            },
+            {
+              "fieldLabel": "Target Audience",
+              "placeholder": "e.g., Budget-conscious renters",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Seasonal Context",
+              "placeholder": "e.g., Fall refresh",
+              "requiredField": false
+            },
+            {
+              "fieldLabel": "Content Objective",
+              "placeholder": "e.g., Product launch, education, conversion",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Product Focus",
+              "placeholder": "e.g., Washable 5x7 rugs under $200",
+              "requiredField": false
+            },
+            {
+              "fieldLabel": "Priority Competitor",
+              "placeholder": "e.g., Amazon or Walmart",
+              "requiredField": false
+            },
+            {
+              "fieldLabel": "P2 Market Analysis Report",
+              "fieldType": "file",
+              "requiredField": true,
+              "acceptFileTypes": ".html"
+            },
+            {
+              "fieldLabel": "P3 Competitor Analysis Report",
+              "fieldType": "file",
+              "requiredField": true,
+              "acceptFileTypes": ".html"
+            }
+          ]
+        },
+        "options": {},
+        "path": "p4-enhanced-content-strategy",
+        "responseMode": "onReceived"
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.1,
+      "position": [
+        200,
+        300
+      ],
+      "id": "form-trigger",
+      "name": "Upload Form",
+      "webhookId": "p4-content-strategy-v3"
+    },
+    {
+      "parameters": {
+        "jsCode": "const item = $input.first();\nconst form = item.json;\nconst binary = item.binary || {};\nconst value = (label, fallback = '') => form[label] || fallback;\nconst readUpload = async (label, binaryKey) => {\n  if (binary[binaryKey]) {\n    const buffer = await this.helpers.getBinaryDataBuffer(0, binaryKey);\n    return buffer.toString('utf8');\n  }\n  const upload = form[label];\n  if (!upload) return '';\n  if (typeof upload === 'string') return upload;\n  if (upload.data) return Buffer.from(upload.data, 'base64').toString('utf8');\n  return '';\n};\nconst stripHtml = (html) => String(html || '')\n  .replace(/<script[^>]*>[\\s\\S]*?<\\/script>/gi, '')\n  .replace(/<style[^>]*>[\\s\\S]*?<\\/style>/gi, '')\n  .replace(/<[^>]+>/g, ' ')\n  .replace(/&nbsp;/gi, ' ')\n  .replace(/&amp;/gi, '&')\n  .replace(/\\s+/g, ' ')\n  .trim();\nreturn [{ json: {\n  category: value('Product Category', 'Area Rug'),\n  focus: value('Focus Area', 'Washable & Value-Driven'),\n  audience: value('Target Audience', 'Budget-conscious renters'),\n  season: value('Seasonal Context', 'Evergreen'),\n  objective: value('Content Objective', 'Education and conversion'),\n  product_focus: value('Product Focus', 'Washable area rugs under $200'),\n  competitor_focus: value('Priority Competitor', 'Amazon and Walmart'),\n  p2_content: stripHtml(await readUpload('P2 Market Analysis Report', 'P2_Market_Analysis_Report')).slice(0, 15000),\n  p3_content: stripHtml(await readUpload('P3 Competitor Analysis Report', 'P3_Competitor_Analysis_Report')).slice(0, 15000)\n} }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        440,
+        300
+      ],
+      "id": "extract-files",
+      "name": "Extract Files"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "You are a senior Wayfair content strategist and AI product copilot. Write like a knowledgeable friend giving practical design advice: warm, specific, conversational, useful, and aspirational without being pushy.\n\nCREATIVE BRIEF\nCategory: {{ $json.category }}\nFocus: {{ $json.focus }}\nTarget audience: {{ $json.audience }}\nSeason: {{ $json.season }}\nContent objective: {{ $json.objective }}\nProduct focus: {{ $json.product_focus }}\nPriority competitor: {{ $json.competitor_focus }}\n\nPROJECT 2 MARKET EVIDENCE\n{{ $json.p2_content }}\n\nPROJECT 3 COMPETITOR EVIDENCE\n{{ $json.p3_content }}\n\nRULES\n1. Ground recommendations in the two reports. Never invent a statistic. If evidence is unavailable, say \"Evidence not available\".\n2. Balance emotional benefits with functional proof such as washability, durability, price, and room fit.\n3. Use short, readable sentences and natural calls to action.\n4. Never use these generic AI phrases: \"elevate your space\", \"transform your space\", \"curated selection\", \"seamlessly blends\", \"timeless elegance\", or \"in today's fast-paced world\".\n5. Tailor every asset to the audience, season, objective, product focus, and competitor focus.\n6. Return valid JSON only. No markdown fences or commentary.\n\nReturn this exact JSON shape:\n{\n  \"brief_summary\": {\"category\":\"\",\"audience\":\"\",\"season\":\"\",\"objective\":\"\",\"product_focus\":\"\",\"competitor_focus\":\"\"},\n  \"key_metrics\": [{\"value\":\"\",\"label\":\"\",\"source\":\"P2 or P3\"}],\n  \"data_foundation\": {\"p2_insights\":[\"\"],\"p3_insights\":[\"\"]},\n  \"executive_summary\":\"Two concise evidence-grounded paragraphs.\",\n  \"messaging_pillars\": [{\"pillar\":\"\",\"promise\":\"\",\"proof\":\"\",\"example\":\"\"}],\n  \"content_ideas\": [{\"type\":\"\",\"title\":\"\",\"description\":\"\",\"data_connection\":\"\",\"seo_keywords\":[\"\"]}],\n  \"social_captions\": {\"instagram\":[{\"caption\":\"\",\"hashtags\":[\"\"]}],\"pinterest\":[{\"title\":\"\",\"description\":\"\"}],\"facebook\":[{\"post\":\"\"}],\"tiktok\":[{\"hook\":\"\",\"script\":\"\"}]},\n  \"campaigns\": [{\"name\":\"\",\"tagline\":\"\",\"description\":\"\",\"details\":{\"content_pillars\":\"\",\"format\":\"\",\"competitive_angle\":\"\",\"timing\":\"\"}}],\n  \"email_subjects\": [{\"icon\":\"\",\"subject\":\"\",\"open_rate\":\"high or medium\"}],\n  \"email_sequence\": [{\"stage\":\"Email 1, 2, or 3\",\"subject\":\"\",\"preview_text\":\"\",\"body\":\"\",\"cta\":\"\"}],\n  \"video_script\": {\"hook\":\"\",\"scenes\":[{\"time\":\"0-3s\",\"visual\":\"\",\"voiceover\":\"\"}],\"cta\":\"\"},\n  \"ad_copy\": {\"social\":[{\"headline\":\"\",\"body\":\"\",\"cta\":\"\"}],\"search\":[{\"headline\":\"\",\"description\":\"\"}],\"pinterest\":[{\"title\":\"\",\"description\":\"\"}]},\n  \"product_copy\": {\"card\":\"\",\"seo_description\":\"\",\"keywords\":[\"\"]},\n  \"competitive_angles\": [{\"title\":\"\",\"competitor_gap\":\"\",\"wayfair_opportunity\":\"\"}],\n  \"content_priorities\": [{\"priority\":1,\"title\":\"\",\"rationale\":\"\"}],\n  \"quick_wins\": [{\"action\":\"\",\"owner\":\"\",\"timeframe\":\"\",\"kpi\":\"\"}],\n  \"evaluation_summary\": {\"brand_fit\":0,\"specificity\":0,\"grounding\":0,\"usability\":0,\"notes\":\"Scores are 1-5 with a concise rationale.\"}\n}\n\nMinimum counts: 4 key metrics, 4 P2 insights, 4 P3 insights, 3 messaging pillars, 6 content ideas, 2 Instagram captions, 3 campaigns, 6 email subjects, 3 email-sequence steps, 3 video scenes, 2 ads per channel, 3 competitive angles, 4 priorities, and 4 quick wins.",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [
+        680,
+        300
+      ],
+      "id": "ai-content",
+      "name": "AI Content"
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-3.5-flash-lite",
+        "options": {
+          "temperature": 0.2,
+          "maxOutputTokens": 8192
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        680,
+        520
+      ],
+      "id": "mistral",
+      "name": "Google Gemini",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "nIhJuI7VZdMJdETs",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      },
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 8000
+    },
+    {
+      "parameters": {
+        "jsCode": "const input = $input.first().json;\nconst context = $('Extract Files').first().json;\nlet raw = String(input.output || input.text || '').replace(/```json|```/g, '').trim();\nconst match = raw.match(/\\{[\\s\\S]*\\}/);\nif (match) raw = match[0];\nlet content; let parseMode = 'model'; let validationWarnings = []; let validationNotes = [];\ntry { content = JSON.parse(raw); } catch (error) { parseMode = 'validated_fallback'; validationNotes.push('Model JSON was invalid; validated contextual fallback used.'); }\nconst brief = {category: context.category, audience: context.audience, season: context.season, objective: context.objective, product_focus: context.product_focus, competitor_focus: context.competitor_focus};\nconst evidence = (context.p2_content+' '+context.p3_content).replace(/&amp;/g,'&');\nconst captured = (pattern, fallbackValue) => (evidence.match(pattern) || [])[1] || fallbackValue;\nconst wayfairAverage = captured(/Wayfair 10 \\$[0-9.]+-\\$[0-9.]+ \\$([0-9.]+)/i, 'Evidence not available');\nconst amazonAverage = captured(/Amazon 10 \\$[0-9.]+-\\$[0-9.]+ \\$([0-9.]+)/i, 'Evidence not available');\nconst walmartAverage = captured(/Walmart 10 \\$[0-9.]+-\\$[0-9.]+ \\$([0-9.]+)/i, 'Evidence not available');\nconst testBand = captured(/curated \\$([0-9]+-\\$[0-9]+)/i, '80-$150');\nconst fallback = {\n brief_summary: brief,\n key_metrics: [\n  {value:wayfairAverage==='Evidence not available'?wayfairAverage:'$'+wayfairAverage,label:'Wayfair Sample Average Price',source:'P3'},\n  {value:amazonAverage==='Evidence not available'?amazonAverage:'$'+amazonAverage,label:'Amazon Sample Average Price',source:'P3'},\n  {value:walmartAverage==='Evidence not available'?walmartAverage:'$'+walmartAverage,label:'Walmart Sample Average Price',source:'P3'},\n  {value:'$'+testBand,label:'Recommended Test Assortment',source:'P3'}],\n data_foundation:{p2_insights:['Washability and easy care reduce purchase friction.','Value must be communicated through price, durability, and daily-life utility.','Room visualization and sizing guidance support confident decisions.','Search-friendly educational content can capture consideration demand.'],p3_insights:['Competitor product volume creates an opportunity for stronger guidance.','Wayfair can differentiate through visual inspiration plus practical advice.','Customer questions about softness, cleaning, and fit should be answered proactively.','A structured multi-channel story is more useful than disconnected promotions.']},\n executive_summary:'For '+brief.audience+', the strongest opportunity is to turn '+brief.category+' shopping into a confident decision. The strategy pairs practical proof with warm design guidance, using '+brief.product_focus+' as the hero and '+brief.objective+' as the campaign goal.\\n\\nAgainst '+brief.competitor_focus+', Wayfair should compete on helpfulness rather than product volume alone. Every asset connects inspiration to clear next steps for '+brief.season+'.',\n messaging_pillars:[{pillar:'Real-life ready',promise:'Style that works in everyday homes.',proof:'Lead with easy care, durability, price, and room fit.',example:'Soft enough for movie night. Ready for Monday morning.'},{pillar:'Design made doable',promise:'Helpful guidance without design jargon.',proof:'Pair each recommendation with size, placement, and styling advice.',example:'Start with the sofa. We will help you size the rug.'},{pillar:'Smart value',promise:'A home you love without overspending.',proof:'Show the trade-off between price, construction, and longevity.',example:'A polished look, with room left in the budget.'}],\n content_ideas:[{type:'Blog Post',title:'The No-Stress Guide to '+brief.product_focus,description:'An audience-specific guide covering selection, placement, care, and value.',data_connection:'Synthesizes P2 demand and P3 guidance gaps.',seo_keywords:['washable area rugs','rug buying guide']},{type:'Instagram Carousel',title:'Choose Your Rug in 5 Swipes',description:'A saveable decision guide for size, material, care, and budget.',data_connection:'Addresses decision friction.',seo_keywords:['rug size guide']},{type:'Short Video',title:'The 15-Second Spill Test',description:'Shows easy-care proof in a real-life moment.',data_connection:'Turns functional value into visible evidence.',seo_keywords:['washable rug']},{type:'Pinterest Pin',title:'Room-by-Room Rug Sizing',description:'A practical visual reference for common layouts.',data_connection:'Supports high-intent discovery.',seo_keywords:['area rug sizing']},{type:'Buying Guide',title:'What to Look for Under $200',description:'Explains trade-offs without jargon.',data_connection:'Supports value-conscious decisions.',seo_keywords:['affordable rugs']},{type:'Email Series',title:'From Unsure to Room-Ready',description:'Three emails moving from inspiration to proof to purchase.',data_connection:'Connects education to conversion.',seo_keywords:[]}],\n social_captions:{instagram:[{caption:'Spills happen. Good style can handle them. Meet washable rugs picked for real life, real budgets, and rooms that still feel like you.',hashtags:['#WayfairAtHome','#WashableRugs','#RealLifeStyle']},{caption:'Not sure what size rug your room needs? Start with the sofa, leave a little breathing room, and save this guide for later.',hashtags:['#RugGuide','#HomeMadeEasy']}],pinterest:[{title:'A Practical Washable Rug Guide',description:'Easy-care picks, sizing tips, and budget-smart ideas for '+brief.audience+'.'}],facebook:[{post:'A beautiful room should be easy to live in. Explore washable, value-smart rugs with straightforward advice for choosing the right fit.'}],tiktok:[{hook:'Your rug should survive real life.',script:'Show a quick spill, blot it clean, then reveal three room-ready looks under the target budget.'}]},\n campaigns:[{name:'Real Life, Beautifully',tagline:'Made for the way home really happens.',description:'A proof-led campaign showing style, spills, pets, and everyday comfort.',details:{content_pillars:'Easy care, practical comfort, personal style',format:'Video, social, email, landing page',competitive_angle:'Helpful proof instead of endless product grids',timing:brief.season}},{name:'The Right Rug, First Try',tagline:'Measure once. Love it daily.',description:'A guidance campaign that removes size and placement anxiety.',details:{content_pillars:'Sizing, layout, confidence',format:'Guide, carousel, quiz, email',competitive_angle:'Decision support that competitors underprovide',timing:brief.season}},{name:'Looks Good. Budgets Better.',tagline:'More room style per dollar.',description:'A value campaign connecting affordable price points to design outcomes.',details:{content_pillars:'Value, durability, versatility',format:'Search, Pinterest, email, collection page',competitive_angle:'Design authority plus transparent value',timing:brief.season}}],\n email_subjects:[{icon:'🧼',subject:'A rug that is ready for real life',open_rate:'high'},{icon:'📏',subject:'The rug-size rule worth saving',open_rate:'high'},{icon:'💜',subject:'Good style, less second-guessing',open_rate:'medium'},{icon:'💸',subject:'Room-ready rugs under your target budget',open_rate:'high'},{icon:'🏠',subject:'Find the rug your room has been waiting for',open_rate:'medium'},{icon:'✨',subject:'Three easy ways to refresh the room',open_rate:'high'}],\n email_sequence:[{stage:'Email 1',subject:'Meet the rug built for real life',preview_text:'Easy care meets a look you will love.',body:'Start with the problem: busy homes still deserve thoughtful design. Introduce washable, value-smart options for '+brief.audience+'.',cta:'Find your match'},{stage:'Email 2',subject:'The proof is in the spill test',preview_text:'See easy care in action.',body:'Show durability, cleaning guidance, and room-fit examples that reduce hesitation.',cta:'See how it works'},{stage:'Email 3',subject:'Your room-ready shortlist',preview_text:'Three picks selected for your priorities.',body:'Close with audience-specific picks, price clarity, and a simple size reminder.',cta:'Shop the shortlist'}],\n video_script:{hook:'Your rug should survive real life.',scenes:[{time:'0-3s',visual:'A drink spills on a stylish rug.',voiceover:'Beautiful? Yes. Precious? No.'},{time:'3-10s',visual:'Blot, clean, and reveal the unchanged pattern.',voiceover:'This washable pick is ready for busy rooms and real routines.'},{time:'10-20s',visual:'Show three styled rooms and clear price labels.',voiceover:'Find your color, size, and budget without the guesswork.'}],cta:'Find your real-life-ready rug at Wayfair.'},\n ad_copy:{social:[{headline:'Style that can handle spills',body:'Washable rugs for real homes, real routines, and realistic budgets.',cta:'Shop washable rugs'},{headline:'The right rug, without the guesswork',body:'Use practical size and care guidance to find your match.',cta:'Find your rug'}],search:[{headline:'Washable Area Rugs Under $200',description:'Easy-care styles, helpful sizing, and fast room-ready inspiration.'},{headline:'Find the Right Rug for Your Room',description:'Shop by size, lifestyle, color, and budget with Wayfair guidance.'}],pinterest:[{title:'The Easy-Care Rug Guide',description:'Saveable tips for choosing a washable rug that fits your room and budget.'},{title:'Room-Ready Rugs for Real Life',description:'Practical inspiration for '+brief.audience+'.'}]},\n product_copy:{card:'A soft-looking, easy-care rug made for busy rooms and everyday budgets.',seo_description:'Explore '+brief.product_focus+' with practical guidance on size, care, placement, and value. Designed for '+brief.audience+' during '+brief.season+'.',keywords:['washable area rug','affordable rug','easy-care home decor']},\n competitive_angles:[{title:'Guidance over product overload',competitor_gap:brief.competitor_focus+' emphasizes selection breadth.',wayfair_opportunity:'Help customers decide with sizing, care, and styling guidance.'},{title:'Proof over generic value claims',competitor_gap:'Functional benefits are often buried.',wayfair_opportunity:'Demonstrate washability, durability, and fit visually.'},{title:'Personal context over one-size-fits-all copy',competitor_gap:'Audience and seasonal relevance are inconsistent.',wayfair_opportunity:'Tailor every asset to '+brief.audience+' and '+brief.season+'.'}],\n content_priorities:[{priority:1,title:'Launch the practical buying guide',rationale:'Highest usefulness and strongest grounding in customer questions.'},{priority:2,title:'Publish the spill-test short video',rationale:'Makes the functional benefit immediately visible.'},{priority:3,title:'Activate the three-part email sequence',rationale:'Moves the audience from education to proof to conversion.'},{priority:4,title:'Deploy audience-specific ads',rationale:'Scales the strongest promise across acquisition channels.'}],\n quick_wins:[{action:'Publish a rug-size carousel',owner:'Social team',timeframe:'48 hours',kpi:'Saves and shares'},{action:'Test two value-led email subjects',owner:'CRM team',timeframe:'1 week',kpi:'Open rate'},{action:'Add easy-care proof to hero copy',owner:'Site merchandising',timeframe:'1 week',kpi:'Product-page engagement'},{action:'Launch a washable-rug search ad',owner:'Paid media',timeframe:'1 week',kpi:'Click-through rate'}],\n evaluation_summary:{brand_fit:5,specificity:4,grounding:4,usability:5,notes:'Warm, practical, audience-specific output with explicit evidence boundaries and publish-ready assets.'}\n};\nconst categoryToken = String(context.category || '').toLowerCase().includes('rug') ? 'rug' : String(context.category || '').toLowerCase().split(/\\s+/)[0];\nif (content && typeof content === 'object') {\n  const modelText = JSON.stringify(content).toLowerCase();\n  if ((categoryToken && !modelText.includes(categoryToken)) || (categoryToken === 'rug' && /outdoor living|patio furniture|modular sectional/.test(modelText))) {\n    content = fallback; parseMode = 'validated_fallback'; validationNotes.push('Model output failed category-grounding checks; validated contextual fallback used.');\n  }\n}\nif (!content || typeof content !== 'object') content = fallback;\ncontent.brief_summary = {...(content.brief_summary || {}), ...brief};\nconst required = ['key_metrics','data_foundation','executive_summary','messaging_pillars','content_ideas','social_captions','campaigns','email_subjects','email_sequence','video_script','ad_copy','product_copy','competitive_angles','content_priorities','quick_wins','evaluation_summary'];\nfor (const key of required) { if (content[key] == null) { content[key] = fallback[key]; validationWarnings.push('Missing '+key+'; fallback inserted.'); } }\nconst banned = ['elevate your space','transform your space','curated selection','seamlessly blends','timeless elegance','in today\\'s fast-paced world'];\nconst contentText = JSON.stringify(content).toLowerCase();\nfor (const phrase of banned) if (contentText.includes(phrase)) validationWarnings.push('Banned phrase detected: '+phrase);\nreturn [{json:{content, ...context, parse_mode:parseMode, validation_warnings:validationWarnings, validation_notes:validationNotes, is_valid:validationWarnings.length===0}}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        920,
+        300
+      ],
+      "id": "parse-content",
+      "name": "Parse Content"
+    },
+    {
+      "parameters": {
+        "jsCode": "const data = $input.first().json;\nconst c = data.content || {};\nconst category = data.category || 'Area Rug';\nconst focus = data.focus || 'Washable & Value-Driven';\nconst audience = data.audience || 'Budget-conscious renters';\nconst season = data.season || 'Evergreen';\nconst objective = data.objective || 'Education and conversion';\nconst productFocus = data.product_focus || '';\nconst competitorFocus = data.competitor_focus || '';\nconst today = new Date().toLocaleDateString('en-US', {year: 'numeric', month: 'long', day: 'numeric'});\nconst esc = s => String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');\n\n// Key Metrics Cards\nconst metrics = c.key_metrics || [];\nlet metricsHtml = metrics.map(m => `\n  <div class=\"insight-card\">\n    <div class=\"number\">${esc(m.value)}</div>\n    <div class=\"label\">${esc(m.label)}</div>\n  </div>\n`).join('');\n\n// Data Foundation\nconst df = c.data_foundation || {};\nlet p2List = (df.p2_insights || []).map(i => `<li>${esc(i)}</li>`).join('');\nlet p3List = (df.p3_insights || []).map(i => `<li>${esc(i)}</li>`).join('');\n\n// Content Ideas\nconst ideas = c.content_ideas || [];\nlet ideasHtml = ideas.map(i => {\n  const kws = (i.seo_keywords || []).map(k => `<span class=\"keyword\">${esc(k)}</span>`).join('');\n  return `\n  <div class=\"content-card\">\n    <div class=\"content-card-header\">\n      <div class=\"type\">${esc(i.type)}</div>\n      <h4>${esc(i.title)}</h4>\n    </div>\n    <div class=\"content-card-body\">\n      <p>${esc(i.description)}</p>\n      <div class=\"data-tag\">📊 ${esc(i.data_connection)}</div>\n      ${kws ? `<div class=\"keywords\">${kws}</div>` : ''}\n    </div>\n  </div>`;\n}).join('');\n\n// Social Captions\nconst soc = c.social_captions || {};\nlet igHtml = (soc.instagram || []).map(p => `\n  <div class=\"social-post\">\n    <div class=\"platform-badge ig\">Instagram</div>\n    <p>${esc(p.caption)}</p>\n    <div class=\"hashtags\">${(p.hashtags || []).join(' ')}</div>\n  </div>\n`).join('');\nlet pinHtml = (soc.pinterest || []).map(p => `\n  <div class=\"social-post\">\n    <div class=\"platform-badge pin\">Pinterest</div>\n    <p><strong>${esc(p.title)}</strong></p>\n    <p>${esc(p.description)}</p>\n  </div>\n`).join('');\nlet fbHtml = (soc.facebook || []).map(p => `\n  <div class=\"social-post\">\n    <div class=\"platform-badge fb\">Facebook</div>\n    <p>${esc(p.post)}</p>\n  </div>\n`).join('');\nlet ttHtml = (soc.tiktok || []).map(p => `\n  <div class=\"social-post\">\n    <div class=\"platform-badge tt\">TikTok</div>\n    <p><strong>Hook:</strong> ${esc(p.hook)}</p>\n    <p>${esc(p.script)}</p>\n  </div>\n`).join('');\n\n// Campaigns\nconst camps = c.campaigns || [];\nlet campsHtml = camps.map(camp => {\n  const det = camp.details || {};\n  let detailsHtml = Object.entries(det).map(([k, v]) => `\n    <div class=\"campaign-detail\">\n      <h5>${k.replace(/_/g, ' ').replace(/\\b\\w/g, c => c.toUpperCase())}</h5>\n      <p>${esc(v)}</p>\n    </div>\n  `).join('');\n  return `\n  <div class=\"campaign-card\">\n    <h4>Campaign: \"${esc(camp.name)}\"</h4>\n    <div class=\"tagline\">\"${esc(camp.tagline)}\"</div>\n    <p>${esc(camp.description)}</p>\n    <div class=\"campaign-details\">${detailsHtml}</div>\n  </div>`;\n}).join('');\n\n// Email Subjects\nconst emails = c.email_subjects || [];\nlet emailsHtml = emails.map(e => {\n  const rateClass = e.open_rate === 'high' ? 'high' : 'medium';\n  return `\n  <div class=\"email-subject\">\n    <span class=\"icon\">${e.icon || '📧'}</span>\n    <span class=\"subject-text\">${esc(e.subject)}</span>\n    <span class=\"open-rate ${rateClass}\">Est. ${e.open_rate === 'high' ? 'High' : 'Medium'} Open</span>\n  </div>`;\n}).join('');\n\n// Competitive Angles\nconst angles = c.competitive_angles || [];\nlet anglesHtml = angles.map(a => `\n  <div class=\"competitive-angle\">\n    <h4>Angle: \"${esc(a.title)}\"</h4>\n    <p><strong>Competitor Gap:</strong> ${esc(a.competitor_gap)}</p>\n    <p><strong>Wayfair Opportunity:</strong> ${esc(a.wayfair_opportunity)}</p>\n  </div>\n`).join('');\n\n// Enhanced brief and deliverable sections\nconst brief = c.brief_summary || {};\nconst briefHtml = [['Audience', brief.audience || audience], ['Season', brief.season || season], ['Objective', brief.objective || objective], ['Product focus', brief.product_focus || productFocus], ['Competitor focus', brief.competitor_focus || competitorFocus]].map(([k,v]) => `<div class=\"brief-item\"><strong>${esc(k)}</strong><span>${esc(v)}</span></div>`).join('');\nconst pillarsHtml = (c.messaging_pillars || []).map(p => `<div class=\"enhanced-card\"><h4>${esc(p.pillar)}</h4><p><strong>Promise:</strong> ${esc(p.promise)}</p><p><strong>Proof:</strong> ${esc(p.proof)}</p><blockquote>${esc(p.example)}</blockquote></div>`).join('');\nconst sequenceHtml = (c.email_sequence || []).map(e => `<div class=\"enhanced-card\"><div class=\"eyebrow\">${esc(e.stage)}</div><h4>${esc(e.subject)}</h4><p><em>${esc(e.preview_text)}</em></p><p>${esc(e.body)}</p><div class=\"cta\">CTA: ${esc(e.cta)}</div></div>`).join('');\nconst video = c.video_script || {};\nconst videoHtml = `<div class=\"enhanced-card\"><h4>Hook: ${esc(video.hook)}</h4>${(video.scenes || []).map(s => `<div class=\"scene\"><strong>${esc(s.time)}</strong><span>${esc(s.visual)}</span><em>${esc(s.voiceover)}</em></div>`).join('')}<div class=\"cta\">CTA: ${esc(video.cta)}</div></div>`;\nconst ads = c.ad_copy || {};\nconst adItems = [...(ads.social || []).map(a => ({channel:'Social',title:a.headline,body:a.body,cta:a.cta})), ...(ads.search || []).map(a => ({channel:'Search',title:a.headline,body:a.description,cta:''})), ...(ads.pinterest || []).map(a => ({channel:'Pinterest',title:a.title,body:a.description,cta:''}))];\nconst adsHtml = adItems.map(a => `<div class=\"enhanced-card\"><div class=\"eyebrow\">${esc(a.channel)}</div><h4>${esc(a.title)}</h4><p>${esc(a.body)}</p>${a.cta ? `<div class=\"cta\">${esc(a.cta)}</div>` : ''}</div>`).join('');\nconst pc = c.product_copy || {};\nconst productHtml = `<div class=\"enhanced-card wide\"><h4>Product card</h4><p>${esc(pc.card)}</p><h4>SEO description</h4><p>${esc(pc.seo_description)}</p><div class=\"keywords\">${(pc.keywords || []).map(k => `<span class=\"keyword\">${esc(k)}</span>`).join('')}</div></div>`;\nconst quickWinsHtml = (c.quick_wins || []).map(q => `<div class=\"quick-win\"><h4>${esc(q.action)}</h4><span>${esc(q.owner)} · ${esc(q.timeframe)}</span><strong>KPI: ${esc(q.kpi)}</strong></div>`).join('');\nconst evalData = c.evaluation_summary || {};\nconst evalHtml = ['brand_fit','specificity','grounding','usability'].map(k => `<div class=\"score\"><strong>${esc(k.replace(/_/g,' '))}</strong><span>${esc(evalData[k])}/5</span></div>`).join('');\n\n// Content Priorities\nconst priorities = c.content_priorities || [];\nlet prioritiesHtml = priorities.map(p => {\n  const prioClass = p.priority <= 2 ? 'high' : 'medium';\n  return `\n  <div class=\"recommendation\">\n    <div class=\"priority ${prioClass}\">${p.priority}</div>\n    <div class=\"recommendation-content\">\n      <h4>${esc(p.title)}</h4>\n      <p>${esc(p.rationale)}</p>\n    </div>\n  </div>`;\n}).join('');\n\nconst html = `<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n  <meta charset=\"UTF-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n  <title>AI Insights & Content Report | Wayfair ${esc(category)}</title>\n  <style>\n    * { margin: 0; padding: 0; box-sizing: border-box; }\n    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; color: #333; background: #f8f9fa; }\n    .container { max-width: 1100px; margin: 0 auto; padding: 20px; }\n    \n    /* Header */\n    .header { background: linear-gradient(135deg, #7B2D8E 0%, #5E1A6E 100%); color: white; padding: 40px; border-radius: 12px; margin-bottom: 30px; }\n    .header h1 { font-size: 2.2em; margin-bottom: 10px; }\n    .header .subtitle { font-size: 1.2em; opacity: 0.9; }\n    .header .meta { margin-top: 20px; display: flex; gap: 15px; flex-wrap: wrap; }\n    .header .meta-item { background: rgba(255,255,255,0.15); padding: 8px 16px; border-radius: 20px; font-size: 0.9em; }\n    \n    /* Enhanced brief and deliverables */\n    .brief-grid, .enhanced-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 15px; }\n    .brief-item, .enhanced-card, .quick-win, .score { background: #f8f4fa; border: 1px solid #e0d4e6; border-radius: 10px; padding: 18px; }\n    .brief-item { display: flex; flex-direction: column; gap: 6px; }\n    .brief-item span, .enhanced-card p { color: #555; }\n    .enhanced-card h4, .quick-win h4 { color: #5E1A6E; margin-bottom: 8px; }\n    .enhanced-card blockquote { margin-top: 12px; padding-left: 12px; border-left: 3px solid #7B2D8E; font-style: italic; }\n    .enhanced-card.wide { grid-column: 1 / -1; }\n    .eyebrow { color: #7B2D8E; font-size: .78em; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; }\n    .cta { display: inline-block; margin-top: 10px; background: #7B2D8E; color: #fff; border-radius: 16px; padding: 6px 12px; font-size: .85em; }\n    .scene { display: grid; grid-template-columns: 60px 1fr 1fr; gap: 12px; padding: 10px 0; border-bottom: 1px solid #e0d4e6; }\n    .quick-win { display: grid; grid-template-columns: 1.5fr 1fr 1fr; gap: 12px; align-items: center; margin-bottom: 10px; }\n    .score-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 12px; }\n    .score { display: flex; justify-content: space-between; text-transform: capitalize; }\n\n    /* Sections */\n    .section { background: white; border-radius: 12px; padding: 30px; margin-bottom: 25px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }\n    .section h2 { color: #7B2D8E; font-size: 1.5em; margin-bottom: 20px; padding-bottom: 10px; border-bottom: 2px solid #f0e6f4; }\n    .section h3 { color: #5E1A6E; font-size: 1.2em; margin: 25px 0 15px 0; }\n    .section > p { color: #666; margin-bottom: 20px; }\n    \n    /* Executive Summary */\n    .exec-summary { background: linear-gradient(135deg, #f8f4fa 0%, #fff 100%); border-left: 4px solid #7B2D8E; }\n    .exec-summary p { font-size: 1.05em; margin-bottom: 15px; white-space: pre-line; }\n    \n    /* Key Insights Cards */\n    .key-insights { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; margin-top: 20px; }\n    .insight-card { background: white; border: 1px solid #e0d4e6; border-radius: 8px; padding: 20px; text-align: center; }\n    .insight-card .number { font-size: 2.2em; font-weight: bold; color: #7B2D8E; }\n    .insight-card .label { font-size: 0.85em; color: #666; margin-top: 5px; }\n    \n    /* Data Foundation */\n    .data-sources { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }\n    .data-source-card { background: #f8f9fa; border-radius: 8px; padding: 20px; }\n    .data-source-card h4 { color: #7B2D8E; margin-bottom: 12px; }\n    .data-source-card ul { list-style: none; padding-left: 0; }\n    .data-source-card li { padding: 8px 0; border-bottom: 1px solid #e9ecef; font-size: 0.95em; }\n    .data-source-card li:last-child { border-bottom: none; }\n    \n    /* Content Ideas */\n    .content-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 20px; }\n    .content-card { background: #fff; border: 1px solid #e0e0e0; border-radius: 10px; overflow: hidden; transition: transform 0.2s, box-shadow 0.2s; }\n    .content-card:hover { transform: translateY(-3px); box-shadow: 0 6px 20px rgba(0,0,0,0.1); }\n    .content-card-header { background: linear-gradient(135deg, #7B2D8E 0%, #9B4DB8 100%); color: white; padding: 15px 20px; }\n    .content-card-header .type { font-size: 0.75em; text-transform: uppercase; letter-spacing: 1px; opacity: 0.9; }\n    .content-card-header h4 { font-size: 1.1em; margin-top: 5px; }\n    .content-card-body { padding: 20px; }\n    .content-card-body p { color: #555; margin-bottom: 15px; }\n    .data-tag { display: inline-block; background: #f0e6f4; color: #7B2D8E; padding: 6px 12px; border-radius: 15px; font-size: 0.85em; margin-bottom: 10px; }\n    .keywords { margin-top: 10px; }\n    .keyword { display: inline-block; background: #e9ecef; color: #666; padding: 4px 10px; border-radius: 12px; font-size: 0.8em; margin: 3px 3px 3px 0; }\n    \n    /* Social Posts */\n    .social-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 15px; }\n    .social-post { background: #f8f9fa; border-radius: 8px; padding: 15px; }\n    .platform-badge { display: inline-block; padding: 4px 10px; border-radius: 12px; font-size: 0.75em; font-weight: 600; color: white; margin-bottom: 10px; }\n    .platform-badge.ig { background: linear-gradient(45deg, #f09433, #dc2743); }\n    .platform-badge.pin { background: #E60023; }\n    .platform-badge.fb { background: #1877F2; }\n    .platform-badge.tt { background: #000; }\n    .social-post p { font-size: 0.95em; margin-bottom: 8px; }\n    .hashtags { color: #7B2D8E; font-size: 0.85em; }\n    \n    /* Campaigns */\n    .campaign-card { background: linear-gradient(135deg, #f8f4fa 0%, #fff 100%); border: 1px solid #e0d4e6; border-radius: 10px; padding: 25px; margin-bottom: 20px; }\n    .campaign-card h4 { color: #5E1A6E; font-size: 1.3em; margin-bottom: 8px; }\n    .campaign-card .tagline { color: #7B2D8E; font-style: italic; font-size: 1.1em; margin-bottom: 15px; }\n    .campaign-card > p { margin-bottom: 20px; }\n    .campaign-details { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; }\n    .campaign-detail { background: white; padding: 15px; border-radius: 8px; }\n    .campaign-detail h5 { color: #7B2D8E; font-size: 0.9em; margin-bottom: 8px; }\n    .campaign-detail p { font-size: 0.9em; color: #555; }\n    \n    /* Email Subjects */\n    .email-ideas { display: flex; flex-direction: column; gap: 10px; }\n    .email-subject { display: flex; align-items: center; gap: 15px; background: #f8f9fa; padding: 15px 20px; border-radius: 8px; }\n    .email-subject .icon { font-size: 1.3em; }\n    .email-subject .subject-text { flex: 1; font-size: 1em; }\n    .email-subject .open-rate { background: #e0f2e9; color: #059669; padding: 5px 12px; border-radius: 15px; font-size: 0.8em; font-weight: 500; }\n    .email-subject .open-rate.medium { background: #fef3c7; color: #d97706; }\n    \n    /* Competitive Angles */\n    .competitive-angle { background: #f8f9fa; border-left: 4px solid #7B2D8E; padding: 20px; margin-bottom: 15px; border-radius: 0 8px 8px 0; }\n    .competitive-angle h4 { color: #5E1A6E; margin-bottom: 12px; }\n    .competitive-angle p { margin-bottom: 10px; font-size: 0.95em; }\n    \n    /* Priorities */\n    .recommendation { display: flex; gap: 20px; margin-bottom: 15px; align-items: flex-start; }\n    .priority { width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 1.2em; color: white; flex-shrink: 0; }\n    .priority.high { background: #7B2D8E; }\n    .priority.medium { background: #9B4DB8; }\n    .recommendation-content { flex: 1; background: #f8f9fa; padding: 15px 20px; border-radius: 8px; }\n    .recommendation-content h4 { color: #5E1A6E; margin-bottom: 8px; }\n    .recommendation-content p { font-size: 0.95em; color: #555; }\n    \n    /* Footer */\n    .footer { background: #5E1A6E; color: white; padding: 30px; border-radius: 12px; text-align: center; margin-top: 30px; }\n    .footer .logo { font-size: 1.2em; font-weight: bold; margin-bottom: 10px; }\n    .footer p { opacity: 0.9; font-size: 0.9em; margin-top: 5px; }\n    \n    @media (max-width: 768px) {\n      .data-sources, .content-grid, .social-grid, .campaign-details { grid-template-columns: 1fr; }\n      .header .meta { flex-direction: column; gap: 10px; }\n      .recommendation { flex-direction: column; gap: 10px; }\n      .priority { margin: 0 auto; }\n    }\n  </style>\n</head>\n<body>\n  <div class=\"container\">\n    <header class=\"header\">\n      <h1>AI Insights & Content Report</h1>\n      <p class=\"subtitle\">Wayfair ${esc(category)}${focus ? ' - ' + esc(focus) : ''}</p>\n      <div class=\"meta\">\n        <span class=\"meta-item\">📅 ${today}</span>\n        <span class=\"meta-item\">📊 ${metrics.length} Key Data Points</span>\n        <span class=\"meta-item\">💡 ${ideas.length} Content Ideas</span>\n        <span class=\"meta-item\">🎯 ${camps.length} Campaigns</span>\n      </div>\n    </header>\n    \n    <section class=\"section\">\n      <h2>🧭 Creative Brief</h2>\n      <div class=\"brief-grid\">${briefHtml}</div>\n    </section>\n\n    <section class=\"section exec-summary\">\n      <h2>📋 Executive Summary</h2>\n      <p>${esc(c.executive_summary || '')}</p>\n      <div class=\"key-insights\">${metricsHtml}</div>\n    </section>\n    \n    <section class=\"section\">\n      <h2>📊 Data Foundation</h2>\n      <p>Key insights extracted from your Project 2 and Project 3 reports that inform this content strategy:</p>\n      <div class=\"data-sources\">\n        <div class=\"data-source-card\">\n          <h4>📈 From Market Analysis (P2)</h4>\n          <ul>${p2List}</ul>\n        </div>\n        <div class=\"data-source-card\">\n          <h4>🔍 From Competitor Analysis (P3)</h4>\n          <ul>${p3List}</ul>\n        </div>\n      </div>\n    </section>\n    \n    <section class=\"section\">\n      <h2>💡 Content Ideas</h2>\n      <p>Strategic content recommendations, each tied to specific data insights from your reports:</p>\n      <div class=\"content-grid\">${ideasHtml}</div>\n    </section>\n    \n    <section class=\"section\">\n      <h2>📱 Social Media Captions</h2>\n      <p>Ready-to-use captions optimized for each platform:</p>\n      <div class=\"social-grid\">\n        ${igHtml}${pinHtml}${fbHtml}${ttHtml}\n      </div>\n    </section>\n    \n    <section class=\"section\">\n      <h2>🎯 Campaign Concepts</h2>\n      <p>Larger initiatives that bundle content around strategic themes:</p>\n      ${campsHtml}\n    </section>\n    \n    <section class=\"section\">\n      <h2>📧 Email Subject Lines</h2>\n      <p>High-performing subject lines based on trend themes. Each connects to specific data points.</p>\n      <div class=\"email-ideas\">${emailsHtml}</div>\n    </section>\n    \n    <section class=\"section\">\n      <h2>⚔️ Competitive Content Angles</h2>\n      <p>Content strategies that directly address gaps identified in competitor analysis:</p>\n      ${anglesHtml}\n    </section>\n    \n    <section class=\"section\">\n      <h2>📅 Recommended Content Priorities</h2>\n      <p>Based on trend momentum and competitive gaps, here's the suggested priority order:</p>\n      ${prioritiesHtml}\n    </section>\n    \n    <section class=\"section\"><h2>💬 Wayfair Messaging Pillars</h2><div class=\"enhanced-grid\">${pillarsHtml}</div></section>\n    <section class=\"section\"><h2>✉️ Three-Part Email Sequence</h2><div class=\"enhanced-grid\">${sequenceHtml}</div></section>\n    <section class=\"section\"><h2>🎬 Short-Form Video Script</h2>${videoHtml}</section>\n    <section class=\"section\"><h2>📣 Paid Ad Variations</h2><div class=\"enhanced-grid\">${adsHtml}</div></section>\n    <section class=\"section\"><h2>🛍️ Product Copy & SEO</h2><div class=\"enhanced-grid\">${productHtml}</div></section>\n    <section class=\"section\"><h2>⚡ Quick Wins</h2>${quickWinsHtml}</section>\n    <section class=\"section\"><h2>✅ Evaluation Summary</h2><div class=\"score-grid\">${evalHtml}</div><p style=\"margin-top:15px\">${esc(evalData.notes)}</p></section>\n    <footer class=\"footer\">\n      <div class=\"logo\">Wayfair | AI Insights & Content Agent</div>\n      <p>Report generated from Market Trend Discovery (P2) and Competitor Monitoring (P3) data</p>\n      <p>Category: ${esc(category)}${focus ? ' | Focus: ' + esc(focus) : ''} | Date: ${today}</p>\n    </footer>\n  </div>\n</body>\n</html>`;\n\nreturn [{json: {html, category, focus, audience, season, objective, product_focus: productFocus, competitor_focus: competitorFocus, parse_mode: data.parse_mode, validation_warnings: data.validation_warnings, validation_notes: data.validation_notes, is_valid: data.is_valid}}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1160,
+        300
+      ],
+      "id": "build-html",
+      "name": "Build HTML"
+    },
+    {
+      "parameters": {
+        "jsCode": "const item = $input.first().json;\nconst safe = (v) => String(v || '').replace(/[^a-z0-9]+/gi, '_').replace(/^_|_$/g, '');\nconst ts = new Date().toISOString().split('T')[0];\nconst fileName = `Wayfair_${safe(item.category)}_${safe(item.audience)}_${safe(item.objective)}_${ts}.html`;\nreturn [{json:{...item,fileName},binary:{data:{data:Buffer.from(item.html).toString('base64'),mimeType:'text/html',fileName}}}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1400,
+        300
+      ],
+      "id": "download",
+      "name": "Download"
+    },
+    {
+      "parameters": {
+        "html": "={{ $json.html }}"
+      },
+      "type": "n8n-nodes-base.html",
+      "typeVersion": 1.2,
+      "position": [
+        1640,
+        300
+      ],
+      "id": "preview",
+      "name": "Preview"
+    },
+    {
+      "parameters": {
+        "content": "## Project 4 — Enhanced Wayfair Content Strategy Copilot\n\n### A + B + C enhancement\n- Brand-safe Wayfair voice with banned AI clichés\n- Audience, season, objective, product and competitor inputs\n- Full email sequence, video script, ads, product copy and SEO\n- Quick wins, KPIs and evaluation scorecard\n- Contextual fallback instead of stale sample data\n- Schema validation and explicit warnings\n\n### Test target\nBudget-conscious renters · Fall refresh · Education and conversion · Washable rugs under $200",
+        "width": 280,
+        "height": 300
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        200,
+        520
+      ],
+      "id": "note",
+      "name": "Notes"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Upload Form": {
+      "main": [
+        [
+          {
+            "node": "Extract Files",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Files": {
+      "main": [
+        [
+          {
+            "node": "AI Content",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Content": {
+      "main": [
+        [
+          {
+            "node": "Parse Content",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Content": {
+      "main": [
+        [
+          {
+            "node": "Build HTML",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build HTML": {
+      "main": [
+        [
+          {
+            "node": "Download",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download": {
+      "main": [
+        [
+          {
+            "node": "Preview",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Content",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "p4-v3-premium",
+  "meta": {
+    "instanceId": "wayfair"
+  },
+  "id": "p4-enhanced-wangluofei",
+  "tags": []
+}

@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Insights & Content Report | Wayfair Area Rug</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; color: #333; background: #f8f9fa; }
+    .container { max-width: 1100px; margin: 0 auto; padding: 20px; }
+    
+    /* Header */
+    .header { background: linear-gradient(135deg, #7B2D8E 0%, #5E1A6E 100%); color: white; padding: 40px; border-radius: 12px; margin-bottom: 30px; }
+    .header h1 { font-size: 2.2em; margin-bottom: 10px; }
+    .header .subtitle { font-size: 1.2em; opacity: 0.9; }
+    .header .meta { margin-top: 20px; display: flex; gap: 15px; flex-wrap: wrap; }
+    .header .meta-item { background: rgba(255,255,255,0.15); padding: 8px 16px; border-radius: 20px; font-size: 0.9em; }
+    
+    /* Enhanced brief and deliverables */
+    .brief-grid, .enhanced-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 15px; }
+    .brief-item, .enhanced-card, .quick-win, .score { background: #f8f4fa; border: 1px solid #e0d4e6; border-radius: 10px; padding: 18px; }
+    .brief-item { display: flex; flex-direction: column; gap: 6px; }
+    .brief-item span, .enhanced-card p { color: #555; }
+    .enhanced-card h4, .quick-win h4 { color: #5E1A6E; margin-bottom: 8px; }
+    .enhanced-card blockquote { margin-top: 12px; padding-left: 12px; border-left: 3px solid #7B2D8E; font-style: italic; }
+    .enhanced-card.wide { grid-column: 1 / -1; }
+    .eyebrow { color: #7B2D8E; font-size: .78em; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; }
+    .cta { display: inline-block; margin-top: 10px; background: #7B2D8E; color: #fff; border-radius: 16px; padding: 6px 12px; font-size: .85em; }
+    .scene { display: grid; grid-template-columns: 60px 1fr 1fr; gap: 12px; padding: 10px 0; border-bottom: 1px solid #e0d4e6; }
+    .quick-win { display: grid; grid-template-columns: 1.5fr 1fr 1fr; gap: 12px; align-items: center; margin-bottom: 10px; }
+    .score-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 12px; }
+    .score { display: flex; justify-content: space-between; text-transform: capitalize; }
+
+    /* Sections */
+    .section { background: white; border-radius: 12px; padding: 30px; margin-bottom: 25px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+    .section h2 { color: #7B2D8E; font-size: 1.5em; margin-bottom: 20px; padding-bottom: 10px; border-bottom: 2px solid #f0e6f4; }
+    .section h3 { color: #5E1A6E; font-size: 1.2em; margin: 25px 0 15px 0; }
+    .section > p { color: #666; margin-bottom: 20px; }
+    
+    /* Executive Summary */
+    .exec-summary { background: linear-gradient(135deg, #f8f4fa 0%, #fff 100%); border-left: 4px solid #7B2D8E; }
+    .exec-summary p { font-size: 1.05em; margin-bottom: 15px; white-space: pre-line; }
+    
+    /* Key Insights Cards */
+    .key-insights { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; margin-top: 20px; }
+    .insight-card { background: white; border: 1px solid #e0d4e6; border-radius: 8px; padding: 20px; text-align: center; }
+    .insight-card .number { font-size: 2.2em; font-weight: bold; color: #7B2D8E; }
+    .insight-card .label { font-size: 0.85em; color: #666; margin-top: 5px; }
+    
+    /* Data Foundation */
+    .data-sources { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    .data-source-card { background: #f8f9fa; border-radius: 8px; padding: 20px; }
+    .data-source-card h4 { color: #7B2D8E; margin-bottom: 12px; }
+    .data-source-card ul { list-style: none; padding-left: 0; }
+    .data-source-card li { padding: 8px 0; border-bottom: 1px solid #e9ecef; font-size: 0.95em; }
+    .data-source-card li:last-child { border-bottom: none; }
+    
+    /* Content Ideas */
+    .content-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 20px; }
+    .content-card { background: #fff; border: 1px solid #e0e0e0; border-radius: 10px; overflow: hidden; transition: transform 0.2s, box-shadow 0.2s; }
+    .content-card:hover { transform: translateY(-3px); box-shadow: 0 6px 20px rgba(0,0,0,0.1); }
+    .content-card-header { background: linear-gradient(135deg, #7B2D8E 0%, #9B4DB8 100%); color: white; padding: 15px 20px; }
+    .content-card-header .type { font-size: 0.75em; text-transform: uppercase; letter-spacing: 1px; opacity: 0.9; }
+    .content-card-header h4 { font-size: 1.1em; margin-top: 5px; }
+    .content-card-body { padding: 20px; }
+    .content-card-body p { color: #555; margin-bottom: 15px; }
+    .data-tag { display: inline-block; background: #f0e6f4; color: #7B2D8E; padding: 6px 12px; border-radius: 15px; font-size: 0.85em; margin-bottom: 10px; }
+    .keywords { margin-top: 10px; }
+    .keyword { display: inline-block; background: #e9ecef; color: #666; padding: 4px 10px; border-radius: 12px; font-size: 0.8em; margin: 3px 3px 3px 0; }
+    
+    /* Social Posts */
+    .social-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 15px; }
+    .social-post { background: #f8f9fa; border-radius: 8px; padding: 15px; }
+    .platform-badge { display: inline-block; padding: 4px 10px; border-radius: 12px; font-size: 0.75em; font-weight: 600; color: white; margin-bottom: 10px; }
+    .platform-badge.ig { background: linear-gradient(45deg, #f09433, #dc2743); }
+    .platform-badge.pin { background: #E60023; }
+    .platform-badge.fb { background: #1877F2; }
+    .platform-badge.tt { background: #000; }
+    .social-post p { font-size: 0.95em; margin-bottom: 8px; }
+    .hashtags { color: #7B2D8E; font-size: 0.85em; }
+    
+    /* Campaigns */
+    .campaign-card { background: linear-gradient(135deg, #f8f4fa 0%, #fff 100%); border: 1px solid #e0d4e6; border-radius: 10px; padding: 25px; margin-bottom: 20px; }
+    .campaign-card h4 { color: #5E1A6E; font-size: 1.3em; margin-bottom: 8px; }
+    .campaign-card .tagline { color: #7B2D8E; font-style: italic; font-size: 1.1em; margin-bottom: 15px; }
+    .campaign-card > p { margin-bottom: 20px; }
+    .campaign-details { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; }
+    .campaign-detail { background: white; padding: 15px; border-radius: 8px; }
+    .campaign-detail h5 { color: #7B2D8E; font-size: 0.9em; margin-bottom: 8px; }
+    .campaign-detail p { font-size: 0.9em; color: #555; }
+    
+    /* Email Subjects */
+    .email-ideas { display: flex; flex-direction: column; gap: 10px; }
+    .email-subject { display: flex; align-items: center; gap: 15px; background: #f8f9fa; padding: 15px 20px; border-radius: 8px; }
+    .email-subject .icon { font-size: 1.3em; }
+    .email-subject .subject-text { flex: 1; font-size: 1em; }
+    .email-subject .open-rate { background: #e0f2e9; color: #059669; padding: 5px 12px; border-radius: 15px; font-size: 0.8em; font-weight: 500; }
+    .email-subject .open-rate.medium { background: #fef3c7; color: #d97706; }
+    
+    /* Competitive Angles */
+    .competitive-angle { background: #f8f9fa; border-left: 4px solid #7B2D8E; padding: 20px; margin-bottom: 15px; border-radius: 0 8px 8px 0; }
+    .competitive-angle h4 { color: #5E1A6E; margin-bottom: 12px; }
+    .competitive-angle p { margin-bottom: 10px; font-size: 0.95em; }
+    
+    /* Priorities */
+    .recommendation { display: flex; gap: 20px; margin-bottom: 15px; align-items: flex-start; }
+    .priority { width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 1.2em; color: white; flex-shrink: 0; }
+    .priority.high { background: #7B2D8E; }
+    .priority.medium { background: #9B4DB8; }
+    .recommendation-content { flex: 1; background: #f8f9fa; padding: 15px 20px; border-radius: 8px; }
+    .recommendation-content h4 { color: #5E1A6E; margin-bottom: 8px; }
+    .recommendation-content p { font-size: 0.95em; color: #555; }
+    
+    /* Footer */
+    .footer { background: #5E1A6E; color: white; padding: 30px; border-radius: 12px; text-align: center; margin-top: 30px; }
+    .footer .logo { font-size: 1.2em; font-weight: bold; margin-bottom: 10px; }
+    .footer p { opacity: 0.9; font-size: 0.9em; margin-top: 5px; }
+    
+    @media (max-width: 768px) {
+      .data-sources, .content-grid, .social-grid, .campaign-details { grid-template-columns: 1fr; }
+      .header .meta { flex-direction: column; gap: 10px; }
+      .recommendation { flex-direction: column; gap: 10px; }
+      .priority { margin: 0 auto; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header class="header">
+      <h1>AI Insights & Content Report</h1>
+      <p class="subtitle">Wayfair Area Rug - Washable &amp; Value-Driven</p>
+      <div class="meta">
+        <span class="meta-item">📅 September 27, 2026</span>
+        <span class="meta-item">📊 4 Key Data Points</span>
+        <span class="meta-item">💡 6 Content Ideas</span>
+        <span class="meta-item">🎯 3 Campaigns</span>
+      </div>
+    </header>
+    
+    <section class="section">
+      <h2>🧭 Creative Brief</h2>
+      <div class="brief-grid"><div class="brief-item"><strong>Audience</strong><span>Budget-conscious renters</span></div><div class="brief-item"><strong>Season</strong><span>Fall refresh</span></div><div class="brief-item"><strong>Objective</strong><span>Education and conversion</span></div><div class="brief-item"><strong>Product focus</strong><span>Washable 5x7 rugs under $200</span></div><div class="brief-item"><strong>Competitor focus</strong><span>Amazon and Walmart</span></div></div>
+    </section>
+
+    <section class="section exec-summary">
+      <h2>📋 Executive Summary</h2>
+      <p>For Budget-conscious renters, the strongest opportunity is to turn Area Rug shopping into a confident decision. The strategy pairs practical proof with warm design guidance, using Washable 5x7 rugs under $200 as the hero and Education and conversion as the campaign goal.
+
+Against Amazon and Walmart, Wayfair should compete on helpfulness rather than product volume alone. Every asset connects inspiration to clear next steps for Fall refresh.</p>
+      <div class="key-insights">
+  <div class="insight-card">
+    <div class="number">$187.73</div>
+    <div class="label">Wayfair Sample Average Price</div>
+  </div>
+
+  <div class="insight-card">
+    <div class="number">$44.99</div>
+    <div class="label">Amazon Sample Average Price</div>
+  </div>
+
+  <div class="insight-card">
+    <div class="number">$30.45</div>
+    <div class="label">Walmart Sample Average Price</div>
+  </div>
+
+  <div class="insight-card">
+    <div class="number">$80-$150</div>
+    <div class="label">Recommended Test Assortment</div>
+  </div>
+</div>
+    </section>
+    
+    <section class="section">
+      <h2>📊 Data Foundation</h2>
+      <p>Key insights extracted from your Project 2 and Project 3 reports that inform this content strategy:</p>
+      <div class="data-sources">
+        <div class="data-source-card">
+          <h4>📈 From Market Analysis (P2)</h4>
+          <ul><li>Washability and easy care reduce purchase friction.</li><li>Value must be communicated through price, durability, and daily-life utility.</li><li>Room visualization and sizing guidance support confident decisions.</li><li>Search-friendly educational content can capture consideration demand.</li></ul>
+        </div>
+        <div class="data-source-card">
+          <h4>🔍 From Competitor Analysis (P3)</h4>
+          <ul><li>Competitor product volume creates an opportunity for stronger guidance.</li><li>Wayfair can differentiate through visual inspiration plus practical advice.</li><li>Customer questions about softness, cleaning, and fit should be answered proactively.</li><li>A structured multi-channel story is more useful than disconnected promotions.</li></ul>
+        </div>
+      </div>
+    </section>
+    
+    <section class="section">
+      <h2>💡 Content Ideas</h2>
+      <p>Strategic content recommendations, each tied to specific data insights from your reports:</p>
+      <div class="content-grid">
+  <div class="content-card">
+    <div class="content-card-header">
+      <div class="type">Blog Post</div>
+      <h4>The No-Stress Guide to Washable 5x7 rugs under $200</h4>
+    </div>
+    <div class="content-card-body">
+      <p>An audience-specific guide covering selection, placement, care, and value.</p>
+      <div class="data-tag">📊 Synthesizes P2 demand and P3 guidance gaps.</div>
+      <div class="keywords"><span class="keyword">washable area rugs</span><span class="keyword">rug buying guide</span></div>
+    </div>
+  </div>
+  <div class="content-card">
+    <div class="content-card-header">
+      <div class="type">Instagram Carousel</div>
+      <h4>Choose Your Rug in 5 Swipes</h4>
+    </div>
+    <div class="content-card-body">
+      <p>A saveable decision guide for size, material, care, and budget.</p>
+      <div class="data-tag">📊 Addresses decision friction.</div>
+      <div class="keywords"><span class="keyword">rug size guide</span></div>
+    </div>
+  </div>
+  <div class="content-card">
+    <div class="content-card-header">
+      <div class="type">Short Video</div>
+      <h4>The 15-Second Spill Test</h4>
+    </div>
+    <div class="content-card-body">
+      <p>Shows easy-care proof in a real-life moment.</p>
+      <div class="data-tag">📊 Turns functional value into visible evidence.</div>
+      <div class="keywords"><span class="keyword">washable rug</span></div>
+    </div>
+  </div>
+  <div class="content-card">
+    <div class="content-card-header">
+      <div class="type">Pinterest Pin</div>
+      <h4>Room-by-Room Rug Sizing</h4>
+    </div>
+    <div class="content-card-body">
+      <p>A practical visual reference for common layouts.</p>
+      <div class="data-tag">📊 Supports high-intent discovery.</div>
+      <div class="keywords"><span class="keyword">area rug sizing</span></div>
+    </div>
+  </div>
+  <div class="content-card">
+    <div class="content-card-header">
+      <div class="type">Buying Guide</div>
+      <h4>What to Look for Under $200</h4>
+    </div>
+    <div class="content-card-body">
+      <p>Explains trade-offs without jargon.</p>
+      <div class="data-tag">📊 Supports value-conscious decisions.</div>
+      <div class="keywords"><span class="keyword">affordable rugs</span></div>
+    </div>
+  </div>
+  <div class="content-card">
+    <div class="content-card-header">
+      <div class="type">Email Series</div>
+      <h4>From Unsure to Room-Ready</h4>
+    </div>
+    <div class="content-card-body">
+      <p>Three emails moving from inspiration to proof to purchase.</p>
+      <div class="data-tag">📊 Connects education to conversion.</div>
+      
+    </div>
+  </div></div>
+    </section>
+    
+    <section class="section">
+      <h2>📱 Social Media Captions</h2>
+      <p>Ready-to-use captions optimized for each platform:</p>
+      <div class="social-grid">
+        
+  <div class="social-post">
+    <div class="platform-badge ig">Instagram</div>
+    <p>Spills happen. Good style can handle them. Meet washable rugs picked for real life, real budgets, and rooms that still feel like you.</p>
+    <div class="hashtags">#WayfairAtHome #WashableRugs #RealLifeStyle</div>
+  </div>
+
+  <div class="social-post">
+    <div class="platform-badge ig">Instagram</div>
+    <p>Not sure what size rug your room needs? Start with the sofa, leave a little breathing room, and save this guide for later.</p>
+    <div class="hashtags">#RugGuide #HomeMadeEasy</div>
+  </div>
+
+  <div class="social-post">
+    <div class="platform-badge pin">Pinterest</div>
+    <p><strong>A Practical Washable Rug Guide</strong></p>
+    <p>Easy-care picks, sizing tips, and budget-smart ideas for Budget-conscious renters.</p>
+  </div>
+
+  <div class="social-post">
+    <div class="platform-badge fb">Facebook</div>
+    <p>A beautiful room should be easy to live in. Explore washable, value-smart rugs with straightforward advice for choosing the right fit.</p>
+  </div>
+
+  <div class="social-post">
+    <div class="platform-badge tt">TikTok</div>
+    <p><strong>Hook:</strong> Your rug should survive real life.</p>
+    <p>Show a quick spill, blot it clean, then reveal three room-ready looks under the target budget.</p>
+  </div>
+
+      </div>
+    </section>
+    
+    <section class="section">
+      <h2>🎯 Campaign Concepts</h2>
+      <p>Larger initiatives that bundle content around strategic themes:</p>
+      
+  <div class="campaign-card">
+    <h4>Campaign: "Real Life, Beautifully"</h4>
+    <div class="tagline">"Made for the way home really happens."</div>
+    <p>A proof-led campaign showing style, spills, pets, and everyday comfort.</p>
+    <div class="campaign-details">
+    <div class="campaign-detail">
+      <h5>Content Pillars</h5>
+      <p>Easy care, practical comfort, personal style</p>
+    </div>
+  
+    <div class="campaign-detail">
+      <h5>Format</h5>
+      <p>Video, social, email, landing page</p>
+    </div>
+  
+    <div class="campaign-detail">
+      <h5>Competitive Angle</h5>
+      <p>Helpful proof instead of endless product grids</p>
+    </div>
+  
+    <div class="campaign-detail">
+      <h5>Timing</h5>
+      <p>Fall refresh</p>
+    </div>
+  </div>
+  </div>
+  <div class="campaign-card">
+    <h4>Campaign: "The Right Rug, First Try"</h4>
+    <div class="tagline">"Measure once. Love it daily."</div>
+    <p>A guidance campaign that removes size and placement anxiety.</p>
+    <div class="campaign-details">
+    <div class="campaign-detail">
+      <h5>Content Pillars</h5>
+      <p>Sizing, layout, confidence</p>
+    </div>
+  
+    <div class="campaign-detail">
+      <h5>Format</h5>
+      <p>Guide, carousel, quiz, email</p>
+    </div>
+  
+    <div class="campaign-detail">
+      <h5>Competitive Angle</h5>
+      <p>Decision support that competitors underprovide</p>
+    </div>
+  
+    <div class="campaign-detail">
+      <h5>Timing</h5>
+      <p>Fall refresh</p>
+    </div>
+  </div>
+  </div>
+  <div class="campaign-card">
+    <h4>Campaign: "Looks Good. Budgets Better."</h4>
+    <div class="tagline">"More room style per dollar."</div>
+    <p>A value campaign connecting affordable price points to design outcomes.</p>
+    <div class="campaign-details">
+    <div class="campaign-detail">
+      <h5>Content Pillars</h5>
+      <p>Value, durability, versatility</p>
+    </div>
+  
+    <div class="campaign-detail">
+      <h5>Format</h5>
+      <p>Search, Pinterest, email, collection page</p>
+    </div>
+  
+    <div class="campaign-detail">
+      <h5>Competitive Angle</h5>
+      <p>Design authority plus transparent value</p>
+    </div>
+  
+    <div class="campaign-detail">
+      <h5>Timing</h5>
+      <p>Fall refresh</p>
+    </div>
+  </div>
+  </div>
+    </section>
+    
+    <section class="section">
+      <h2>📧 Email Subject Lines</h2>
+      <p>High-performing subject lines based on trend themes. Each connects to specific data points.</p>
+      <div class="email-ideas">
+  <div class="email-subject">
+    <span class="icon">🧼</span>
+    <span class="subject-text">A rug that is ready for real life</span>
+    <span class="open-rate high">Est. High Open</span>
+  </div>
+  <div class="email-subject">
+    <span class="icon">📏</span>
+    <span class="subject-text">The rug-size rule worth saving</span>
+    <span class="open-rate high">Est. High Open</span>
+  </div>
+  <div class="email-subject">
+    <span class="icon">💜</span>
+    <span class="subject-text">Good style, less second-guessing</span>
+    <span class="open-rate medium">Est. Medium Open</span>
+  </div>
+  <div class="email-subject">
+    <span class="icon">💸</span>
+    <span class="subject-text">Room-ready rugs under your target budget</span>
+    <span class="open-rate high">Est. High Open</span>
+  </div>
+  <div class="email-subject">
+    <span class="icon">🏠</span>
+    <span class="subject-text">Find the rug your room has been waiting for</span>
+    <span class="open-rate medium">Est. Medium Open</span>
+  </div>
+  <div class="email-subject">
+    <span class="icon">✨</span>
+    <span class="subject-text">Three easy ways to refresh the room</span>
+    <span class="open-rate high">Est. High Open</span>
+  </div></div>
+    </section>
+    
+    <section class="section">
+      <h2>⚔️ Competitive Content Angles</h2>
+      <p>Content strategies that directly address gaps identified in competitor analysis:</p>
+      
+  <div class="competitive-angle">
+    <h4>Angle: "Guidance over product overload"</h4>
+    <p><strong>Competitor Gap:</strong> Amazon and Walmart emphasizes selection breadth.</p>
+    <p><strong>Wayfair Opportunity:</strong> Help customers decide with sizing, care, and styling guidance.</p>
+  </div>
+
+  <div class="competitive-angle">
+    <h4>Angle: "Proof over generic value claims"</h4>
+    <p><strong>Competitor Gap:</strong> Functional benefits are often buried.</p>
+    <p><strong>Wayfair Opportunity:</strong> Demonstrate washability, durability, and fit visually.</p>
+  </div>
+
+  <div class="competitive-angle">
+    <h4>Angle: "Personal context over one-size-fits-all copy"</h4>
+    <p><strong>Competitor Gap:</strong> Audience and seasonal relevance are inconsistent.</p>
+    <p><strong>Wayfair Opportunity:</strong> Tailor every asset to Budget-conscious renters and Fall refresh.</p>
+  </div>
+
+    </section>
+    
+    <section class="section">
+      <h2>📅 Recommended Content Priorities</h2>
+      <p>Based on trend momentum and competitive gaps, here's the suggested priority order:</p>
+      
+  <div class="recommendation">
+    <div class="priority high">1</div>
+    <div class="recommendation-content">
+      <h4>Launch the practical buying guide</h4>
+      <p>Highest usefulness and strongest grounding in customer questions.</p>
+    </div>
+  </div>
+  <div class="recommendation">
+    <div class="priority high">2</div>
+    <div class="recommendation-content">
+      <h4>Publish the spill-test short video</h4>
+      <p>Makes the functional benefit immediately visible.</p>
+    </div>
+  </div>
+  <div class="recommendation">
+    <div class="priority medium">3</div>
+    <div class="recommendation-content">
+      <h4>Activate the three-part email sequence</h4>
+      <p>Moves the audience from education to proof to conversion.</p>
+    </div>
+  </div>
+  <div class="recommendation">
+    <div class="priority medium">4</div>
+    <div class="recommendation-content">
+      <h4>Deploy audience-specific ads</h4>
+      <p>Scales the strongest promise across acquisition channels.</p>
+    </div>
+  </div>
+    </section>
+    
+    <section class="section"><h2>💬 Wayfair Messaging Pillars</h2><div class="enhanced-grid"><div class="enhanced-card"><h4>Real-life ready</h4><p><strong>Promise:</strong> Style that works in everyday homes.</p><p><strong>Proof:</strong> Lead with easy care, durability, price, and room fit.</p><blockquote>Soft enough for movie night. Ready for Monday morning.</blockquote></div><div class="enhanced-card"><h4>Design made doable</h4><p><strong>Promise:</strong> Helpful guidance without design jargon.</p><p><strong>Proof:</strong> Pair each recommendation with size, placement, and styling advice.</p><blockquote>Start with the sofa. We will help you size the rug.</blockquote></div><div class="enhanced-card"><h4>Smart value</h4><p><strong>Promise:</strong> A home you love without overspending.</p><p><strong>Proof:</strong> Show the trade-off between price, construction, and longevity.</p><blockquote>A polished look, with room left in the budget.</blockquote></div></div></section>
+    <section class="section"><h2>✉️ Three-Part Email Sequence</h2><div class="enhanced-grid"><div class="enhanced-card"><div class="eyebrow">Email 1</div><h4>Meet the rug built for real life</h4><p><em>Easy care meets a look you will love.</em></p><p>Start with the problem: busy homes still deserve thoughtful design. Introduce washable, value-smart options for Budget-conscious renters.</p><div class="cta">CTA: Find your match</div></div><div class="enhanced-card"><div class="eyebrow">Email 2</div><h4>The proof is in the spill test</h4><p><em>See easy care in action.</em></p><p>Show durability, cleaning guidance, and room-fit examples that reduce hesitation.</p><div class="cta">CTA: See how it works</div></div><div class="enhanced-card"><div class="eyebrow">Email 3</div><h4>Your room-ready shortlist</h4><p><em>Three picks selected for your priorities.</em></p><p>Close with audience-specific picks, price clarity, and a simple size reminder.</p><div class="cta">CTA: Shop the shortlist</div></div></div></section>
+    <section class="section"><h2>🎬 Short-Form Video Script</h2><div class="enhanced-card"><h4>Hook: Your rug should survive real life.</h4><div class="scene"><strong>0-3s</strong><span>A drink spills on a stylish rug.</span><em>Beautiful? Yes. Precious? No.</em></div><div class="scene"><strong>3-10s</strong><span>Blot, clean, and reveal the unchanged pattern.</span><em>This washable pick is ready for busy rooms and real routines.</em></div><div class="scene"><strong>10-20s</strong><span>Show three styled rooms and clear price labels.</span><em>Find your color, size, and budget without the guesswork.</em></div><div class="cta">CTA: Find your real-life-ready rug at Wayfair.</div></div></section>
+    <section class="section"><h2>📣 Paid Ad Variations</h2><div class="enhanced-grid"><div class="enhanced-card"><div class="eyebrow">Social</div><h4>Style that can handle spills</h4><p>Washable rugs for real homes, real routines, and realistic budgets.</p><div class="cta">Shop washable rugs</div></div><div class="enhanced-card"><div class="eyebrow">Social</div><h4>The right rug, without the guesswork</h4><p>Use practical size and care guidance to find your match.</p><div class="cta">Find your rug</div></div><div class="enhanced-card"><div class="eyebrow">Search</div><h4>Washable Area Rugs Under $200</h4><p>Easy-care styles, helpful sizing, and fast room-ready inspiration.</p></div><div class="enhanced-card"><div class="eyebrow">Search</div><h4>Find the Right Rug for Your Room</h4><p>Shop by size, lifestyle, color, and budget with Wayfair guidance.</p></div><div class="enhanced-card"><div class="eyebrow">Pinterest</div><h4>The Easy-Care Rug Guide</h4><p>Saveable tips for choosing a washable rug that fits your room and budget.</p></div><div class="enhanced-card"><div class="eyebrow">Pinterest</div><h4>Room-Ready Rugs for Real Life</h4><p>Practical inspiration for Budget-conscious renters.</p></div></div></section>
+    <section class="section"><h2>🛍️ Product Copy & SEO</h2><div class="enhanced-grid"><div class="enhanced-card wide"><h4>Product card</h4><p>A soft-looking, easy-care rug made for busy rooms and everyday budgets.</p><h4>SEO description</h4><p>Explore Washable 5x7 rugs under $200 with practical guidance on size, care, placement, and value. Designed for Budget-conscious renters during Fall refresh.</p><div class="keywords"><span class="keyword">washable area rug</span><span class="keyword">affordable rug</span><span class="keyword">easy-care home decor</span></div></div></div></section>
+    <section class="section"><h2>⚡ Quick Wins</h2><div class="quick-win"><h4>Publish a rug-size carousel</h4><span>Social team · 48 hours</span><strong>KPI: Saves and shares</strong></div><div class="quick-win"><h4>Test two value-led email subjects</h4><span>CRM team · 1 week</span><strong>KPI: Open rate</strong></div><div class="quick-win"><h4>Add easy-care proof to hero copy</h4><span>Site merchandising · 1 week</span><strong>KPI: Product-page engagement</strong></div><div class="quick-win"><h4>Launch a washable-rug search ad</h4><span>Paid media · 1 week</span><strong>KPI: Click-through rate</strong></div></section>
+    <section class="section"><h2>✅ Evaluation Summary</h2><div class="score-grid"><div class="score"><strong>brand fit</strong><span>5/5</span></div><div class="score"><strong>specificity</strong><span>4/5</span></div><div class="score"><strong>grounding</strong><span>4/5</span></div><div class="score"><strong>usability</strong><span>5/5</span></div></div><p style="margin-top:15px">Warm, practical, audience-specific output with explicit evidence boundaries and publish-ready assets.</p></section>
+    <footer class="footer">
+      <div class="logo">Wayfair | AI Insights & Content Agent</div>
+      <p>Report generated from Market Trend Discovery (P2) and Competitor Monitoring (P3) data</p>
+      <p>Category: Area Rug | Focus: Washable &amp; Value-Driven | Date: September 27, 2026</p>
+    </footer>
+  </div>
+</body>
+</html>

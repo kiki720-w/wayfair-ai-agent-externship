@@ -1,0 +1,40 @@
+{
+  "execution_id": 32,
+  "status": "success",
+  "parse_mode": "validated_fallback",
+  "is_valid": true,
+  "validation_warnings": [],
+  "validation_notes": [
+    "Model output failed category-grounding checks; validated contextual fallback used."
+  ],
+  "input": {
+    "category": "Area Rug",
+    "focus": "Washable & Value-Driven",
+    "audience": "Budget-conscious renters",
+    "season": "Fall refresh",
+    "objective": "Education and conversion",
+    "product_focus": "Washable 5x7 rugs under $200",
+    "competitor_focus": "Amazon and Walmart",
+    "p2_characters": 7461,
+    "p3_characters": 7105
+  },
+  "output_counts": {
+    "key_metrics": 4,
+    "messaging_pillars": 3,
+    "content_ideas": 6,
+    "email_sequence": 3,
+    "video_scenes": 3,
+    "quick_wins": 4
+  },
+  "html_characters": 28564,
+  "required_sections": {
+    "Creative Brief": true,
+    "Wayfair Messaging Pillars": true,
+    "Three-Part Email Sequence": true,
+    "Short-Form Video Script": true,
+    "Paid Ad Variations": true,
+    "Product Copy & SEO": true,
+    "Quick Wins": true,
+    "Evaluation Summary": true
+  }
+}
