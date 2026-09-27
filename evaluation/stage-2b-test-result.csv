@@ -1,0 +1,2 @@
+test_id,input,expected,result,status,runtime_seconds,notes
+S2B-01,"Area Rug | focus: washable","All four signal endpoints succeed; sources are normalized; images and market data are preserved","instagram=8; pinterest=5; blogs=3; market=1; socialItems=16; socialImages=6; analysisSuccess=true",PASS,20.408,"Verified in n8n on 2026-09-27; source samples are curated and historical"
