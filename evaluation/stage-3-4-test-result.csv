@@ -1,0 +1,2 @@
+test_id,input,expected,result,status,runtime_seconds,notes
+S34-01,"Area Rug | focus: washable","Category data is normalized into 2-3 micro-segments and one encoded visual per segment","3 micro-segments; 3 cleaned prompts; 3 SVG visual previews; HF branch configured but token absent",PASS_WITH_FALLBACK,11.239,"Gemini provider returned service unavailable; AI agents disabled temporarily and deterministic fallbacks labelled explicitly"

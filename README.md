@@ -62,7 +62,7 @@ Ready-to-submit sample outputs and the reflection are in [docs/extern-submission
 
 The Project 2 planning artifact is documented in [docs/project-2-step-1.md](docs/project-2-step-1.md), including a four-block workflow sketch for the Area Rugs market-trend agent.
 
-Stages 1–2B of the Market Trend Discovery Agent are available as an importable n8n workflow in [workflows/stage-1-input-routing.json](workflows/stage-1-input-routing.json). Stage 1 implementation notes are in [docs/project-2-step-2.md](docs/project-2-step-2.md), the verified Amazon product-data stage is documented in [docs/project-2-step-3.md](docs/project-2-step-3.md), and the social/industry signal pipeline is documented in [docs/project-2-step-4.md](docs/project-2-step-4.md).
+Stages 1–4 of the Market Trend Discovery Agent are available as an importable n8n workflow in [workflows/stage-1-input-routing.json](workflows/stage-1-input-routing.json). Stage 1 implementation notes are in [docs/project-2-step-2.md](docs/project-2-step-2.md), the Amazon product-data stage is documented in [docs/project-2-step-3.md](docs/project-2-step-3.md), the social/industry signal pipeline in [docs/project-2-step-4.md](docs/project-2-step-4.md), and the AI processing plus visual-generation stages in [docs/project-2-step-5.md](docs/project-2-step-5.md).
 
 ## Product direction
 
